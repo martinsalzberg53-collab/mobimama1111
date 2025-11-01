@@ -86,3 +86,14 @@ class MessageViewSet(viewsets.ModelViewSet):
         """Automatically assign the authenticated user as the sender."""
         user = self.request.user
         serializer.save(sender=user)
+
+    @action(detail=True, methods=['post'])
+    def mark_as_read(self, request, pk=None):
+        """Custom action to mark a message as read."""
+        message = self.get_object()
+        if message.receiver != request.user:
+            return Response({'error': 'You can only mark your own messages as read.'}, status=status.HTTP_403_FORBIDDEN)
+        message.read = True
+        message.save()
+        serializer = self.get_serializer(message)
+        return Response(serializer.data)
