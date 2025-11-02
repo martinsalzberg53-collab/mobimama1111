@@ -14,6 +14,24 @@ class ClinicSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Clinic with this name already exists.")
         return value
 
+class NurseProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = NurseAssignment
+        fields = ['id', 'nurse', 'clinic', 'qualifications', 'phone_number']
+        read_only_fields = ['id']
+    
+    def create(self, validated_data):
+        """Create a NurseProfile instance."""
+        nurse_assignment = NurseAssignment.objects.create(**validated_data)
+        return nurse_assignment
+    
+    def update(self, instance, validated_data):
+        """Update NurseProfile instance."""
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
 class NurseAssignmentSerializer(serializers.ModelSerializer):
     class Meta:
         model = NurseAssignment

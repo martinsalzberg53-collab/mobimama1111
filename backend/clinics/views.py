@@ -20,6 +20,19 @@ class ClinicViewSet(viewsets.ModelViewSet):
             permission_classes = [permissions.AllowAny]
         return [permission() for permission in permission_classes]
     
+class NurseProfileViewSet(viewsets.ModelViewSet):
+
+    serializer_class = NurseAssignmentSerializer
+    permission_classes = [permissions.IsAdminUser]
+
+    def get_queryset(self):
+
+        '''Limit queryset based on user role.'''
+
+        user = self.request.user
+        if user.role == 'nurse':
+            return NurseAssignment.objects.filter(nurse=user)
+        return NurseAssignment.objects.all()
 
 class NurseAssignmentViewSet(viewsets.ModelViewSet):
 

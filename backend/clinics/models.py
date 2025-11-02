@@ -10,6 +10,13 @@ class Clinic(models.Model):
 
     def __str__(self):
         return self.name
+    
+class NurseProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, limit_choices_to={'role':'nurse'})
+    qualifications = models.TextField(blank=True)
+
+    def __str__(self):
+        return self.user.username
 
 class NurseAssignment(models.Model):
     nurse = models.ForeignKey(User, on_delete=models.CASCADE, limit_choices_to={'role':'nurse'})
