@@ -19,5 +19,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/users/', include('users.urls')),  #Jwt login endpoints
+    path('api/users/', include('users.urls')),  #Jwt login endpoints for users
+    path('api/clinics/', include('clinics.urls')),  # Clinic management endpoints
+    path('api/mothers/', include('mothers.urls')),  # Mother management endpoints
 ]

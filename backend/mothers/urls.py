@@ -1,7 +1,10 @@
 from django.urls import path
-from .views import mother_dashboard, nurse_dashboard
+from .views import MotherProfileViewSet, AppointmentViewSet, MessageViewSet
+from rest_framework.routers import DefaultRouter
 
-urlpatterns = [
-    path('mother/', mother_dashboard),
-    path('nurse/', nurse_dashboard),
-]
+router = DefaultRouter()
+router.register(r'profiles', MotherProfileViewSet, basename='motherprofile')
+router.register(r'appointments', AppointmentViewSet, basename='appointment')
+router.register(r'messages', MessageViewSet, basename='message')
+
+urlpatterns = router.urls
