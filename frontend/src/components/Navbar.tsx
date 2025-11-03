@@ -20,23 +20,29 @@ const Navbar = () => {
 
             {/* Role-based dashboard links */}
             {user.role === "mother" && (
-              <Link to="/motherdashboard" style={{ marginRight: "10px" }}>
-                My Dashboard
-              </Link>
+              <>
+                <Link to="/motherdashboard" style={{ marginRight: "10px" }}>
+                  Dashboard
+                </Link>
+                <Link to="/motherprofile" style={{ marginRight: "10px" }}>
+                  Profile
+                </Link>
+                <Link to="/motherappointments" style={{ marginRight: "10px" }}>
+                  Appointments
+                </Link>
+              </>
             )}
 
             {user.role === "nurse" && (
               <Link to="/nursedashboard" style={{ marginRight: "10px" }}>
-                My Dashboard
+                Dashboard
               </Link>
             )}
 
             <button onClick={logout}>Logout</button>
           </>
         ) : (
-          <>
-            <Link to="/login">Login</Link>
-          </>
+          <Link to="/login">Login</Link>
         )}
       </div>
     </nav>
