@@ -20,13 +20,13 @@ const Navbar = () => {
 
             {/* Role-based dashboard links */}
             {user.role === "mother" && (
-              <Link to="/dashboard/mother" style={{ marginRight: "10px" }}>
+              <Link to="/motherdashboard" style={{ marginRight: "10px" }}>
                 Mother Dashboard
               </Link>
             )}
 
             {user.role === "nurse" && (
-              <Link to="/dashboard/nurse" style={{ marginRight: "10px" }}>
+              <Link to="/nursedashboard" style={{ marginRight: "10px" }}>
                 Nurse Dashboard
               </Link>
             )}
