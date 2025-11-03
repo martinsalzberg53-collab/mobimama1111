@@ -9,7 +9,7 @@ const Navbar = () => {
     <nav>
       <div>
         <Link to="/" className="brand">
-          MyApp
+          Mobi
         </Link>
       </div>
 
@@ -21,13 +21,13 @@ const Navbar = () => {
             {/* Role-based dashboard links */}
             {user.role === "mother" && (
               <Link to="/motherdashboard" style={{ marginRight: "10px" }}>
-                Mother Dashboard
+                My Dashboard
               </Link>
             )}
 
             {user.role === "nurse" && (
               <Link to="/nursedashboard" style={{ marginRight: "10px" }}>
-                Nurse Dashboard
+                My Dashboard
               </Link>
             )}
 
