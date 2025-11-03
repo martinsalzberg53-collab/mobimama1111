@@ -6,6 +6,7 @@ class User(AbstractUser):
         ('mother', 'Mother'),
         ('nurse', 'Nurse'),
     )
+    username = models.CharField(max_length=150, unique=True)
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
     clinic = models.CharField(max_length=100, blank=True, null=True)  # For nurses
     email = models.EmailField(unique=True)
