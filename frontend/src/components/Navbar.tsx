@@ -17,12 +17,25 @@ const Navbar = () => {
         {user ? (
           <>
             <span style={{ marginRight: "10px" }}>Hi, {user.username}</span>
+
+            {/* Role-based dashboard links */}
+            {user.role === "mother" && (
+              <Link to="/dashboard/mother" style={{ marginRight: "10px" }}>
+                Mother Dashboard
+              </Link>
+            )}
+
+            {user.role === "nurse" && (
+              <Link to="/dashboard/nurse" style={{ marginRight: "10px" }}>
+                Nurse Dashboard
+              </Link>
+            )}
+
             <button onClick={logout}>Logout</button>
           </>
         ) : (
           <>
             <Link to="/login">Login</Link>
-            <Link to="/register">Register</Link>
           </>
         )}
       </div>
