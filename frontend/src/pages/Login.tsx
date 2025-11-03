@@ -34,8 +34,8 @@ const Login = () => {
       login({ ...userRes.data, token: accessToken });
 
       // 4️⃣ Redirect based on role
-      if (userRes.data.role === "mother") navigate("/dashboard/mother");
-      else if (userRes.data.role === "nurse") navigate("/dashboard/nurse");
+      if (userRes.data.role === "mother") navigate("/MotherDashboard");
+      else if (userRes.data.role === "nurse") navigate("/NurseDashboard");
     } catch (err: any) {
       console.error(err);
       setError("Invalid credentials or server error. Please try again.");

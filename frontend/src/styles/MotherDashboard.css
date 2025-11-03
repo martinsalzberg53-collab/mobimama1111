@@ -1,19 +1,102 @@
-/* MotherDashboard.css / NurseDashboard.css */
 .dashboard-container {
-  max-width: 800px;
-  margin: 40px auto;
-  padding: 20px;
+  min-height: 100vh;
+  width: 100%;
+  background-color: #ffffff;
+  color: #213547;
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  padding: 20px 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  box-sizing: border-box;
+}
+
+.dashboard-header {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.dashboard-header h1 {
+  font-size: 2.8em;
+  margin-bottom: 10px;
+  color: #4caf50;
+}
+
+.dashboard-header p {
+  font-size: 1.2em;
+  margin-bottom: 20px;
+  color: #555555;
+}
+
+.logout-btn {
+  padding: 10px 20px;
+  background-color: #f44336;
+  color: white;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.logout-btn:hover {
+  background-color: #d32f2f;
+}
+
+/* Wrap main sections in flex row for large screens */
+.dashboard-container > section {
+  margin: 20px 0;
+}
+
+.main-sections {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+/* Cards styling */
+.summary-card,
+.ai-tips-card,
+.quick-actions {
   background-color: #f2f2f2;
+  padding: 25px;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* Quick action buttons */
+.buttons-container {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.action-btn {
+  flex: 1 1 45%;
+  padding: 12px 20px;
+  background-color: #4caf50;
+  color: white;
   border-radius: 8px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  text-decoration: none;
+  font-weight: bold;
+  text-align: center;
 }
 
-.dashboard-container h1 {
-  color: #333;
-  margin-bottom: 15px;
+.action-btn:hover {
+  background-color: #45a049;
 }
 
-.dashboard-container p {
-  color: #555;
-  line-height: 1.5;
+/* Responsive layout */
+@media (max-width: 768px) {
+  .main-sections {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .action-btn {
+    flex: 1 1 100%;
+  }
 }

@@ -1,0 +1,38 @@
+.appointments-container {
+  min-height: 100vh;
+  background-color: #ffffff;
+  color: #213547;
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  padding: 40px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.appointments-container h1 {
+  font-size: 2.5em;
+  margin-bottom: 30px;
+  color: #4caf50; /* green accent */
+}
+
+.appointments-list {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+  max-width: 600px;
+}
+
+.appointment-card {
+  background-color: #f2f2f2;
+  padding: 20px;
+  margin-bottom: 15px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.appointment-card span {
+  font-size: 1.05em;
+}
