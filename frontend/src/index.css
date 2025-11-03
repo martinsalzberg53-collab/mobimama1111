@@ -4,8 +4,8 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: #213547; /* dark text for white background */
+  background-color: #ffffff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -34,8 +34,8 @@ body {
   display: flex;
   flex-direction: column;
   min-width: 320px;
-  background-color: #242424;
-  color: rgba(255, 255, 255, 0.87);
+  background-color: #ffffff; /* update to white */
+  color: #213547; /* dark text */
 }
 
 /* 3️⃣ Optional: style h1, buttons, etc. */
@@ -51,7 +51,7 @@ button {
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: #f1f1f1; /* lighter button for white bg */
   cursor: pointer;
   transition: border-color 0.25s;
 }
