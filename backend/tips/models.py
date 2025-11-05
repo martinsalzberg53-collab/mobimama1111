@@ -20,7 +20,7 @@ class Tip(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
-        limit_choices_to={'role__in': ['NURSE', 'ADMIN']},  # ONLY NURSES OR ADMIN
+        limit_choices_to={'role':'ADMIN'},  # ONLY ADMIN
     )
 
     is_approved = models.BooleanField(default=False)

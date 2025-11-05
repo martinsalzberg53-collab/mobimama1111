@@ -5,35 +5,50 @@ from .serializers import TipSerializer
 
 # Create your views here.
 
-class IsNurseOrAdminReadOnly(permissions.BasePermission):
-    "permission to allow only nurse or admin to edit"
+class IsAdminOrReadOnly(permissions.BasePermission):
+    """
+    Custom permission:
+    - Allows read-only access (GET) to any authenticated user.
+    - Allows write access (POST, PUT, DELETE) only to Admins.
+    """
     def has_permission(self, request, view):
+        # Allow GET, HEAD, OPTIONS requests for any logged-in user
         if request.method in permissions.SAFE_METHODS:
             return request.user and request.user.is_authenticated
         
-        return request.user and (request.user.role in ['NURSE','ADMIN'])
+        # Deny write access if user is not an Admin
+        return request.user and request.user.role == 'ADMIN'
     
+# In tips/views.py
+
 class TipViewSet(viewsets.ModelViewSet):
-    "allows tips to be viewed or edited."
-
-    queryset = Tip.objects.filter(is_approved = True)
+    """
+    API endpoint that allows tips to be viewed or edited.
+    """
     serializer_class = TipSerializer
-    permission_classes = [IsNurseOrAdminReadOnly]
-
+    
+    # --- CHANGE THIS LINE ---
+    permission_classes = [IsAdminOrReadOnly]
+    # Was: permission_classes = [IsNurseOrAdminOrReadOnly]
 
     def perform_create(self, serializer):
-        "sets the tip author to the logged in user when created"
+        """
+        Automatically set the author of the tip to the logged-in admin.
+        (This code stays the same, but now only Admins can run it)
+        """
         serializer.save(author=self.request.user)
 
     def get_queryset(self):
-        """mothers only see approved tips
-        = nurses can see unapproved tips"""
-
+        """
+        - Admins see all approved tips + their own drafts.
+        - All other users (Mothers, Nurses) see only approved tips.
+        """
         user = self.request.user
-
-        if user.role in ['NURSE', 'ADMIN']:
-            #nurses/admin get to see their own approved tips or tips they created
-            return Tip.objects.filter (models.Q(is_approved = True) | models.Q(author=user).distinct)
         
-        #mothers only see approved tips
+        if user.is_authenticated and user.role == 'ADMIN':
+            return Tip.objects.filter(
+                Q(is_approved=True) | Q(author=user)
+            ).distinct()
+        
+        # Mothers and Nurses only see approved tips
         return Tip.objects.filter(is_approved=True)
