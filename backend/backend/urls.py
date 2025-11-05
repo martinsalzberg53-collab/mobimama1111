@@ -23,4 +23,5 @@ urlpatterns = [
     path('api/users/', include('users.urls')),  #Jwt login endpoints for users
     path('api/clinics/', include('clinics.urls')),  # Clinic management endpoints
     path('api/mothers/', include('mothers.urls')),  # Mother management endpoints
+    path('api/tips/', include('tips.urls')), # Tips management endpoints
 ]
