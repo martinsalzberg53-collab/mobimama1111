@@ -1,48 +1,85 @@
-import { Link } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
 import "../styles/Navbar.css";
 
+// Helper function to handle active NavLink styling
+// This will add the class "active-link" to the NavLink that matches the current URL
+const getNavLinkClass = ({ isActive }: { isActive: boolean }) => {
+  return isActive ? "nav-link active-link" : "nav-link";
+};
+
 const Navbar = () => {
   const { user, logout } = useUser();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login"); // Redirect to login page after logout
+  };
+
+  // --- Links for Logged-Out Users ---
+  const guestLinks = (
+    <>
+      <NavLink to="/login" className={getNavLinkClass}>
+        Login
+      </NavLink>
+      <NavLink to="/register" className="nav-link cta-button">
+        Sign Up
+      </NavLink>
+    </>
+  );
+
+  // --- Links for "Mother" Role ---
+  const motherLinks = (
+    <>
+      <NavLink to="/MotherDashboard" className={getNavLinkClass}>
+        Dashboard
+      </NavLink>
+      <NavLink to="/motherprofile" className={getNavLinkClass}>
+        Profile
+      </NavLink>
+      <NavLink to="/motherappointments" className={getNavLinkClass}>
+        Appointments
+      </NavLink>
+    </>
+  );
+
+  // --- Links for "Nurse" Role ---
+  const nurseLinks = (
+    <>
+      <NavLink to="/NurseDashboard" className={getNavLinkClass}>
+        Dashboard
+      </NavLink>
+      <NavLink to="/nurse-profile" className={getNavLinkClass}>
+        Profile
+      </NavLink>
+    </>
+  );
 
   return (
-    <nav>
-      <div>
-        <Link to="/" className="brand">
-          Mobi
+    <nav className="navbar-container">
+      <div className="navbar-brand">
+        <Link to={user ? (user.role === 'MOTHER' ? "/MotherDashboard" : "/NurseDashboard") : "/"}>
+          Mobi Mama
         </Link>
       </div>
 
-      <div className="links">
+      <div className="navbar-links">
         {user ? (
           <>
-            <span style={{ marginRight: "10px" }}>Hi, {user.username}</span>
+            {/* We use user.first_name, which we get from our API */}
+            <span className="navbar-greeting">Hi, {user.first_name}!</span>
 
-            {/* Role-based dashboard links */}
-            {user.role === "mother" && (
-              <>
-                <Link to="/motherdashboard" style={{ marginRight: "10px" }}>
-                  Dashboard
-                </Link>
-                <Link to="/motherprofile" style={{ marginRight: "10px" }}>
-                  Profile
-                </Link>
-                <Link to="/motherappointments" style={{ marginRight: "10px" }}>
-                  Appointments
-                </Link>
-              </>
-            )}
+            {/* Render links based on user role */}
+            {user.role === "MOTHER" && motherLinks}
+            {user.role === "NURSE" && nurseLinks}
 
-            {user.role === "nurse" && (
-              <Link to="/nursedashboard" style={{ marginRight: "10px" }}>
-                Dashboard
-              </Link>
-            )}
-
-            <button onClick={logout}>Logout</button>
+            <button onClick={handleLogout} className="logout-button">
+              Logout
+            </button>
           </>
         ) : (
-          <Link to="/login">Login</Link>
+          guestLinks
         )}
       </div>
     </nav>

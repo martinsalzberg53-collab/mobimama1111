@@ -1,29 +1,83 @@
-nav {
+/* --- Main Navbar Container --- */
+.navbar-container {
   display: flex;
-  justify-content: space-between;
-  padding: 10px 20px;
-  border-bottom: 1px solid #ccc;
-  background-color: #f8f8f8;
+  justify-content: space-between; /* Pushes brand left, links right */
+  align-items: center;
+  padding: 1rem 2.5%; /* Matches the padding of your dashboard */
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  font-family: Arial, sans-serif;
 }
 
-nav .brand {
+/* --- Brand/Logo --- */
+.navbar-brand a {
+  font-size: 1.5rem;
   font-weight: bold;
-  margin-right: 15px;
+  color: #0056b3; /* Main brand color */
   text-decoration: none;
-  color: #333;
 }
 
-nav .links a {
-  margin-right: 10px;
-  text-decoration: none;
-  color: #333;
+/* --- Links Container --- */
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* This replaces all your inline margin-right styles */
 }
 
-nav .links button {
-  padding: 5px 10px;
-  background-color: #ff4d4f;
+/* --- Individual NavLinks --- */
+.nav-link {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  padding-bottom: 5px; /* Space for the active border */
+  border-bottom: 2px solid transparent; /* Placeholder for active state */
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  color: #0056b3;
+}
+
+/* --- Active Link Style --- */
+/* This style is applied by NavLink automatically */
+.nav-link.active-link {
+  color: #0056b3;
+  border-bottom-color: #0056b3; /* Adds an underline to the active page */
+}
+
+/* --- User Greeting --- */
+.navbar-greeting {
+  color: #555;
+  font-style: italic;
+}
+
+/* --- Buttons --- */
+.logout-button {
+  background-color: #d9534f;
   color: white;
   border: none;
-  border-radius: 4px;
+  padding: 8px 14px;
+  border-radius: 5px;
   cursor: pointer;
+  font-size: 0.95rem;
+  transition: background-color 0.2s;
+}
+
+.logout-button:hover {
+  background-color: #c9302c;
+}
+
+/* "Call to Action" button for Sign Up */
+.cta-button {
+  background-color: #007bff;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 5px;
+}
+.cta-button:hover {
+  background-color: #0056b3;
+  color: white;
+}
+.cta-button.active-link {
+  border-bottom: none; /* No underline for buttons */
 }
