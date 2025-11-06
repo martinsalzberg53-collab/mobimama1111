@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { useUser } from "../context/UserContext"; // 1. Import your hook
+import API from "../api/axios"; // 2. Import your configured Axios instance
 import "../styles/MotherDashboard.css";
 
 const AITipsCard = () => {
-  // 2. Get the *entire user object* from your context
-  const { user } = useUser(); 
+  // 3. Get both 'user' and 'token' from context
+  const { user, token } = useUser(); 
 
   const [allTips, setAllTips] = useState([]);
   const [currentTip, setCurrentTip] = useState(null);
@@ -21,34 +22,16 @@ const AITipsCard = () => {
   };
 
   useEffect(() => {
-    // 3. Get the token *from* the user object
-    const token = user?.token;
-
     const fetchTips = async () => {
-      if (!token) { // Check if the token exists
-        setError("You are not logged in.");
-        setIsLoading(false);
-        return;
-      }
-
       setIsLoading(true);
       setError(null);
-
       try {
-        const response = await fetch("/api/tips/tips", {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            // 4. Use the token here
-            "Authorization": `Bearer ${token}` 
-          },
-        });
+        // 4. Use the API instance and the correct URL
+        // The Auth header is now added AUTOMATICALLY by the Axios interceptor
+        const response = await API.get("/tips/");
 
-        if (!response.ok) {
-          throw new Error("Could not fetch tips. Please try again later.");
-        }
-
-        const data = await response.json();
+        // 5. Axios automatically parses JSON and puts it in `response.data`
+        const data = response.data;
 
         if (data && data.length > 0) {
           setAllTips(data);
@@ -57,26 +40,27 @@ const AITipsCard = () => {
         } else {
           setError("No health tips found.");
         }
-      } catch (err) {
-        setError(err.message);
+      } catch (err: any) {
+        // 6. Axios automatically throws an error on 4xx/5xx status
+        console.error(err);
+        setError(err.message || "Could not fetch tips. Please try again later.");
       } finally {
         setIsLoading(false);
       }
     };
 
-    // Only run fetchTips if we have a user and a token
-    if (user && user.token) {
+    // 7. Check for 'token' from context, not 'user.token'
+    if (user && token) {
       fetchTips();
     } else {
-      // Handle case where user is logged out or data is loading
       setIsLoading(false);
       setError("Please log in to see tips.");
     }
   
-  // 5. Re-run this effect if the 'user' object changes (e.g., login/logout)
-  }, [user]); 
+  // 8. Add 'token' to the dependency array
+  }, [user, token]); 
 
-  // --- Render Logic (stays the same) ---
+  // --- Render Logic (This part was already perfect) ---
   const renderContent = () => {
     if (isLoading) {
       return <p>Loading tip...</p>;
@@ -104,7 +88,7 @@ const AITipsCard = () => {
       <button 
         onClick={getNewTip} 
         className="new-tip-btn" 
-        disabled={isLoading || allTips.length < 2}
+        disabled={isLoading || allTips.length < 2 || error}
       >
         Get New Tip
       </button>
