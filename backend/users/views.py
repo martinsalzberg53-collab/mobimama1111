@@ -2,7 +2,7 @@ from rest_framework import generics, permissions
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
-from .serializers import UserSerializer, RegisterSerializer
+from .serializers import UserSerializer, RegisterSerializer, LoginSerializer
 from .models import User
 
 class RegisterView(generics.CreateAPIView):
@@ -36,6 +36,8 @@ class CustomLoginView(ObtainAuthToken):
     """
     # Anyone can access this page (e.g., to log in)
     permission_classes = (permissions.AllowAny,)
+
+    serializer_class = LoginSerializer
 
     def post(self, request, *args, **kwargs):
         # Try to log the user in

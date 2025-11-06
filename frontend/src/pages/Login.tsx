@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
-import API from "../api/axios"; // Axios instance with baseURL pointing to /api
+import API from "../api/axios"; // Your configured Axios instance
 import "../styles/Login.css";
 
 const Login = () => {
+  // 1. Get the login function from our upgraded context
   const { login } = useUser();
   const navigate = useNavigate();
 
@@ -17,28 +18,35 @@ const Login = () => {
     setError("");
 
     try {
-      // 1️⃣ POST credentials to Django JWT endpoint
-      const tokenRes = await API.post("/users/token/", {
-        username: email, // or "email" if your backend uses email for login
+      // 2. Call our single, custom login endpoint
+      const res = await API.post("/users/login/", {
+        email: email, // Use 'email', not 'username'
         password: password,
       });
 
-      const accessToken = tokenRes.data.access;
+      // 3. The response (res.data) contains BOTH the user and token
+      //    No second API call is needed!
+      const { user, token } = res.data;
 
-      // 2️⃣ Fetch current user using JWT
-      const userRes = await API.get("/users/current_user/", {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      // 4. Call our context's login function with two arguments
+      login(user, token);
 
-      // 3️⃣ Save user in context with token
-      login({ ...userRes.data, token: accessToken });
-
-      // 4️⃣ Redirect based on role
-      if (userRes.data.role === "mother") navigate("/MotherDashboard");
-      else if (userRes.data.role === "nurse") navigate("/NurseDashboard");
+      // 5. Redirect based on the role
+      if (user.role === "MOTHER") {
+        navigate("/MotherDashboard");
+      } else if (user.role === "NURSE") {
+        navigate("/NurseDashboard");
+      } else {
+        // Handle other roles or default redirect
+        navigate("/");
+      }
     } catch (err: any) {
       console.error(err);
-      setError("Invalid credentials or server error. Please try again.");
+      if (err.response && err.response.status === 400) {
+        setError("Invalid email or password. Please try again.");
+      } else {
+        setError("A server error occurred. Please try again later.");
+      }
     }
   };
 
@@ -46,9 +54,10 @@ const Login = () => {
     <div className="login-container">
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
-        <label>Username:</label>
+        {/* 6. Changed label from "Username" to "Email" */}
+        <label>Email:</label>
         <input
-          type="text"
+          type="email" // Use type="email" for better validation
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
