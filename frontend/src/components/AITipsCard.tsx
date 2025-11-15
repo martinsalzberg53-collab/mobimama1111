@@ -28,7 +28,7 @@ const AITipsCard = () => {
       try {
         // 4. Use the API instance and the correct URL
         // The Auth header is now added AUTOMATICALLY by the Axios interceptor
-        const response = await API.get("/tips/");
+        const response = await API.get("/tips/tips");
 
         // 5. Axios automatically parses JSON and puts it in `response.data`
         const data = response.data;
