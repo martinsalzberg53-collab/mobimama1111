@@ -51,7 +51,3 @@ It offers appointment booking, curated tips, and AI-driven assistance all in one
 - React Router  
 - Context API / Redux (optional future addition)  
 
----
-
-## 📦 Project Structure
-
