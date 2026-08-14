@@ -25,12 +25,12 @@ class NurseProfileViewSet(viewsets.ModelViewSet):
     serializer_class = NurseAssignmentSerializer
     permission_classes = [permissions.IsAdminUser]
 
+    def _normalize_role(self, role):
+        return role.upper() if isinstance(role, str) else role
+
     def get_queryset(self):
-
-        '''Limit queryset based on user role.'''
-
         user = self.request.user
-        if user.role == 'nurse':
+        if self._normalize_role(getattr(user, 'role', None)) == 'NURSE':
             return NurseAssignment.objects.filter(nurse=user)
         return NurseAssignment.objects.all()
 
@@ -39,12 +39,12 @@ class NurseAssignmentViewSet(viewsets.ModelViewSet):
     serializer_class = NurseAssignmentSerializer
     permission_classes = [permissions.IsAdminUser]
 
+    def _normalize_role(self, role):
+        return role.upper() if isinstance(role, str) else role
+
     def get_queryset(self):
-
-        '''Limit queryset based on user role.'''
-
         user = self.request.user
-        if user.role == 'nurse':
+        if self._normalize_role(getattr(user, 'role', None)) == 'NURSE':
             return NurseAssignment.objects.filter(nurse=user)
         return NurseAssignment.objects.all()
     

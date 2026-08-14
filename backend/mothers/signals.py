@@ -6,5 +6,5 @@ from .models import MotherProfile
 
 @receiver(post_save, sender=User)
 def create_mother_profile(sender, instance, created, **kwargs):
-    if created and instance.role == 'mother':
+    if created and isinstance(instance.role, str) and instance.role.upper() == 'MOTHER':
         MotherProfile.objects.create(user=instance)

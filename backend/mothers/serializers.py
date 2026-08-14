@@ -1,16 +1,28 @@
 from rest_framework import serializers
 from mothers.models import MotherProfile, Message
+from users.serializers import UserSerializer
 
 class MotherProfileSerializer(serializers.ModelSerializer):
+    user = UserSerializer(read_only=True)
+    risk_level = serializers.SerializerMethodField()
+    risk_reasons = serializers.SerializerMethodField()
+
     class Meta:
         model = MotherProfile
-        fields = ['id', 'user', 'due_date', 'clinic_name', 'health_info', 'ai_insights', 'phone_number']
-        read_only_fields = ['id', 'ai_insights']
+        fields = ['id', 'user', 'due_date', 'clinic_name', 'health_info', 'ai_insights', 'phone_number', 'risk_level', 'risk_reasons']
+        read_only_fields = ['id', 'ai_insights', 'risk_level', 'risk_reasons', 'user']
+
+    def get_risk_level(self, instance):
+        return instance.get_risk_level()
+
+    def get_risk_reasons(self, instance):
+        return instance.get_risk_reasons()
 
     def create(self, validated_data):
         """Create a MotherProfile instance linked to the requesting user."""
         user = self.context['request'].user
         mother_profile = MotherProfile.objects.create(user=user, **validated_data)
+        return mother_profile
 
     def update(self, instance, validated_data):
         """Update MotherProfile instance."""
@@ -18,9 +30,8 @@ class MotherProfileSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         return instance
-    
 
-    
+
 class MessageSerializer(serializers.ModelSerializer):
     class Meta:
         model = Message
@@ -34,7 +45,7 @@ class MessageSerializer(serializers.ModelSerializer):
             validated_data['sender'] = request.user
         message = Message.objects.create(**validated_data)
         return message
-    
+
     def update(self, instance, validated_data):
         """Update Message instance."""
         for attr, value in validated_data.items():

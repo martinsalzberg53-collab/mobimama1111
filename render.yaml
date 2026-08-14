@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: mobi-mama
+    runtime: docker
+    plan: free
+    healthCheckPath: /
+    envVars:
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DJANGO_DEBUG
+        value: "false"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: mobi-mama-db
+          property: connectionString
+      - key: GEMINI_API_KEY
+        value: your-gemini-api-key-here
+
+databases:
+  - name: mobi-mama-db
+    databaseName: mobi_mama
+    user: mobi_mama
+    plan: free
+    postgresMajorVersion: "17"

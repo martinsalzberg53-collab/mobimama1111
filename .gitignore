@@ -71,3 +71,19 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+
+# ===================================================================
+#  Project-specific stray / generated files
+# ===================================================================
+
+# Office temp lock files
+~$*
+
+# Proposal / documentation PDFs (regenerated locally)
+*.pdf
+
+# Stray empty file created accidentally
+backend/python
+
+# Root-level npm placeholder (real lockfile lives in frontend/)
+/package-lock.json

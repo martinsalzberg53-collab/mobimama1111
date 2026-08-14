@@ -12,13 +12,22 @@ class MotherProfileViewSet(viewsets.ModelViewSet):
     serializer_class = MotherProfileSerializer
     permission_classes = [permissions.IsAuthenticated]
 
+    def _normalize_role(self, role):
+        return role.upper() if isinstance(role, str) else role
+
     def get_queryset(self):
         """Return the MotherProfile for the authenticated user."""
-
         user = self.request.user
-        if user.role == 'mother':
+        role = self._normalize_role(getattr(user, 'role', None))
+
+        if role == 'MOTHER':
             return MotherProfile.objects.filter(user=user)
-        return MotherProfile.objects.all()
+
+        if role == 'NURSE':
+            # Nurses can view all mother profiles and manage care for patients across clinics.
+            return MotherProfile.objects.all()
+
+        return MotherProfile.objects.none()
 
     def create(self, request, *args, **kwargs):
         user = request.user
