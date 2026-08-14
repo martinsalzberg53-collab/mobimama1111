@@ -9,4 +9,4 @@ gunicorn==23.0.0
 psycopg[binary]==3.2.9
 whitenoise==6.9.0
 google-generativeai==0.8.6
-openai-whisper==20250611
+openai-whisper==20250625
