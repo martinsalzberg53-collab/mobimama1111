@@ -33,11 +33,16 @@ const NurseDashboard = () => {
   const { user } = useUser();
   const [mothers, setMothers] = useState<MotherProfile[]>([]);
   const [clinics, setClinics] = useState<Clinic[]>([]);
+  const [myAssignment, setMyAssignment] = useState<{ id: number; clinic: number } | null>(null);
+  const [selectedClinic, setSelectedClinic] = useState<number | null>(null);
+  const [assignmentMsg, setAssignmentMsg] = useState("");
+  const [assignmentError, setAssignmentError] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
     fetchAssignedMothers();
     fetchClinics();
+    fetchMyAssignment();
   }, []);
 
   const fetchAssignedMothers = async () => {
@@ -57,6 +62,50 @@ const NurseDashboard = () => {
       setClinics(response.data);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const fetchMyAssignment = async () => {
+    try {
+      const response = await API.get<{ id: number; nurse: number; clinic: number }[]>(
+        "/clinics/nurse-assignments/"
+      );
+      const assignment = response.data[0];
+      setMyAssignment(assignment ? { id: assignment.id, clinic: assignment.clinic } : null);
+      setSelectedClinic(assignment ? assignment.clinic : null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const saveAssignment = async () => {
+    setAssignmentMsg("");
+    setAssignmentError("");
+
+    if (!selectedClinic) {
+      setAssignmentError("Please choose your clinic first.");
+      return;
+    }
+
+    try {
+      if (myAssignment) {
+        await API.put(`/clinics/nurse-assignments/${myAssignment.id}/`, {
+          clinic: selectedClinic,
+        });
+      } else {
+        await API.post("/clinics/nurse-assignments/", {
+          clinic: selectedClinic,
+        });
+      }
+      setAssignmentMsg("Your clinic assignment was saved.");
+      fetchMyAssignment();
+    } catch (err: any) {
+      console.error(err);
+      const detail =
+        err.response?.data?.detail ||
+        err.response?.data?.non_field_errors?.[0] ||
+        "Could not save your clinic assignment.";
+      setAssignmentError(detail);
     }
   };
 
@@ -94,6 +143,36 @@ const NurseDashboard = () => {
           <p>High-risk mothers require attention</p>
         </div>
       </header>
+
+      <section className="alerts-panel">
+        <h2>My Clinic</h2>
+        {clinics.length ? (
+          <>
+            <label htmlFor="my-clinic">Select the clinic where you work</label>
+            <select
+              id="my-clinic"
+              value={selectedClinic ?? ""}
+              onChange={(e) => setSelectedClinic(Number(e.target.value))}
+            >
+              <option value="" disabled>
+                Choose a clinic
+              </option>
+              {clinics.map((clinic) => (
+                <option key={clinic.id} value={clinic.id}>
+                  {clinic.name}
+                </option>
+              ))}
+            </select>
+            <button onClick={saveAssignment} className="save-assignment-button">
+              Save Clinic
+            </button>
+            {assignmentMsg && <p className="assignment-success">{assignmentMsg}</p>}
+            {assignmentError && <p className="assignment-error">{assignmentError}</p>}
+          </>
+        ) : (
+          <p className="alerts-empty">No clinics are available yet.</p>
+        )}
+      </section>
 
       <section className="alerts-panel">
         <h2>Automated Safety Alerts</h2>

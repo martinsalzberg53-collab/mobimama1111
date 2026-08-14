@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, serializers
 from .models import Clinic, NurseAssignment
 from .serializers import ClinicSerializer, NurseAssignmentSerializer
 
@@ -37,21 +37,25 @@ class NurseProfileViewSet(viewsets.ModelViewSet):
 class NurseAssignmentViewSet(viewsets.ModelViewSet):
 
     serializer_class = NurseAssignmentSerializer
-    permission_classes = [permissions.IsAdminUser]
+    permission_classes = [permissions.IsAuthenticated]
 
     def _normalize_role(self, role):
         return role.upper() if isinstance(role, str) else role
 
     def get_queryset(self):
         user = self.request.user
-        if self._normalize_role(getattr(user, 'role', None)) == 'NURSE':
-            return NurseAssignment.objects.filter(nurse=user)
-        return NurseAssignment.objects.all()
-    
-    def perform_create(self, serializer):
-        '''Ensure only admin users can create nurse assignments.'''
+        if self._normalize_role(getattr(user, 'role', None)) == 'ADMIN':
+            return NurseAssignment.objects.all()
+        return NurseAssignment.objects.filter(nurse=user)
 
+    def perform_create(self, serializer):
+        '''Nurses create their own assignment; admins can assign on behalf of others.'''
         user = self.request.user
-        if not user.is_staff:
-            raise permissions.PermissionDenied("Only admin users can create nurse assignments.")
-        serializer.save()
+        if self._normalize_role(getattr(user, 'role', None)) != 'ADMIN':
+            if NurseAssignment.objects.filter(nurse=user).exists():
+                raise serializers.ValidationError(
+                    "You already have a clinic assigned. Update it instead of creating a new one."
+                )
+            serializer.save(nurse=user)
+        else:
+            serializer.save()
