@@ -20,21 +20,9 @@ class MotherProfile(models.Model):
         reasons = []
         info = self.health_info or {}
 
-        systolic = info.get('blood_pressure_systolic')
-        diastolic = info.get('blood_pressure_diastolic')
-        heart_rate = info.get('heart_rate')
-        temperature = info.get('temperature')
         symptoms = info.get('symptoms', []) or []
         fetal_movement = info.get('fetal_movement')
 
-        if systolic is not None and systolic >= 140:
-            reasons.append('High systolic blood pressure')
-        if diastolic is not None and diastolic >= 90:
-            reasons.append('High diastolic blood pressure')
-        if heart_rate is not None and heart_rate >= 100:
-            reasons.append('Elevated heart rate')
-        if temperature is not None and temperature >= 37.8:
-            reasons.append('Fever detected')
         if 'severe_pain' in symptoms or 'heavy_bleeding' in symptoms:
             reasons.append('Serious reported symptoms')
         if fetal_movement is not None and fetal_movement == 'reduced':
@@ -48,17 +36,9 @@ class MotherProfile(models.Model):
             return 'Low'
 
         info = self.health_info or {}
-        systolic = info.get('blood_pressure_systolic')
-        diastolic = info.get('blood_pressure_diastolic')
-        heart_rate = info.get('heart_rate')
-        temperature = info.get('temperature')
         symptoms = info.get('symptoms', []) or []
 
         if any([
-            systolic is not None and systolic >= 160,
-            diastolic is not None and diastolic >= 100,
-            heart_rate is not None and heart_rate >= 110,
-            temperature is not None and temperature >= 38.5,
             'heavy_bleeding' in symptoms,
             'severe_pain' in symptoms,
         ]):

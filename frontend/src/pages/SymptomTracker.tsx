@@ -2,10 +2,6 @@ import { useState } from "react";
 
 export default function SymptomTracker() {
   const [formData, setFormData] = useState({
-    bloodPressure: "",
-    weight: "",
-    temperature: "",
-    gestationalAge: "",
     headache: false,
     blurredVision: false,
     swelling: false,
@@ -36,8 +32,6 @@ export default function SymptomTracker() {
     let risk = "Low";
     let advice =
       "No major warning signs detected. Continue antenatal visits, rest well, and maintain a healthy diet.";
-
-    const bp = formData.bloodPressure.trim();
 
     // HIGH RISK CONDITIONS
     if (formData.bleeding) {
@@ -78,23 +72,6 @@ export default function SymptomTracker() {
         "Persistent vomiting may cause dehydration. Please consult a healthcare provider.";
     }
 
-    // BLOOD PRESSURE CHECK
-    if (bp.includes("/")) {
-      const parts = bp.split("/");
-      const systolic = Number(parts[0]);
-      const diastolic = Number(parts[1]);
-
-      if (systolic >= 140 || diastolic >= 90) {
-        risk = "High";
-        advice =
-          "⚠️ High blood pressure detected. Seek immediate medical evaluation.";
-      } else if (systolic >= 130 || diastolic >= 85) {
-        risk = "Medium";
-        advice =
-          "Elevated blood pressure. Monitor closely and consult your healthcare provider.";
-      }
-    }
-
     setRiskLevel(risk);
     setRecommendation(advice);
   };
@@ -108,52 +85,6 @@ export default function SymptomTracker() {
   return (
     <div style={{ maxWidth: "750px", margin: "30px auto", padding: "20px" }}>
       <h2>🩺 Maternal Symptom Tracker</h2>
-
-      {/* BLOOD PRESSURE */}
-      <label>Blood Pressure</label>
-      <input
-        type="text"
-        name="bloodPressure"
-        placeholder="120/80"
-        value={formData.bloodPressure}
-        onChange={handleChange}
-      />
-
-      <br /><br />
-
-      {/* WEIGHT */}
-      <label>Weight (kg)</label>
-      <input
-        type="number"
-        name="weight"
-        value={formData.weight}
-        onChange={handleChange}
-      />
-
-      <br /><br />
-
-      {/* TEMPERATURE */}
-      <label>Temperature (°C)</label>
-      <input
-        type="number"
-        step="0.1"
-        name="temperature"
-        value={formData.temperature}
-        onChange={handleChange}
-      />
-
-      <br /><br />
-
-      {/* GESTATIONAL AGE */}
-      <label>Gestational Age (weeks)</label>
-      <input
-        type="number"
-        name="gestationalAge"
-        value={formData.gestationalAge}
-        onChange={handleChange}
-      />
-
-      <br /><br />
 
       <h3>Symptoms</h3>
 
