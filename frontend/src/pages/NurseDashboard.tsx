@@ -29,10 +29,27 @@ type Clinic = {
   phone_number: string;
 };
 
+type Appointment = {
+  id: number;
+  mother: number | null;
+  nurse: number | null;
+  clinic_name: number | null;
+  date_time: string;
+  reason: string;
+  status: "pending" | "approved" | "cancelled" | "completed";
+  mother_name: string;
+  nurse_name: string;
+  clinic_display: string;
+};
+
 const NurseDashboard = () => {
   const { user } = useUser();
   const [mothers, setMothers] = useState<MotherProfile[]>([]);
   const [clinics, setClinics] = useState<Clinic[]>([]);
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [apptMsg, setApptMsg] = useState("");
+  const [apptError, setApptError] = useState("");
+  const [busyApptId, setBusyApptId] = useState<number | null>(null);
   const [myAssignment, setMyAssignment] = useState<{ id: number; clinic: number } | null>(null);
   const [selectedClinic, setSelectedClinic] = useState<number | null>(null);
   const [assignmentMsg, setAssignmentMsg] = useState("");
@@ -43,6 +60,7 @@ const NurseDashboard = () => {
     fetchAssignedMothers();
     fetchClinics();
     fetchMyAssignment();
+    fetchAppointments();
   }, []);
 
   const fetchAssignedMothers = async () => {
@@ -53,6 +71,15 @@ const NurseDashboard = () => {
     } catch (err) {
       console.error(err);
       setError("Unable to load assigned mothers. Please refresh.");
+    }
+  };
+
+  const fetchAppointments = async () => {
+    try {
+      const response = await API.get<Appointment[]>("/appointments/appointments/");
+      setAppointments(response.data);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -110,6 +137,57 @@ const NurseDashboard = () => {
   };
 
   const highRiskMothers = mothers.filter((mother) => mother.risk_level === "High");
+
+  const handleApprove = async (apptId: number) => {
+    setApptMsg("");
+    setApptError("");
+    setBusyApptId(apptId);
+    try {
+      await API.post(`/appointments/appointments/${apptId}/approve/`);
+      setApptMsg("Appointment approved. The mother is now your patient.");
+      fetchAppointments();
+      fetchAssignedMothers();
+    } catch (err: any) {
+      console.error(err);
+      const detail =
+        err.response?.data?.error ||
+        err.response?.data?.detail ||
+        "Could not approve the appointment.";
+      setApptError(detail);
+    } finally {
+      setBusyApptId(null);
+    }
+  };
+
+  const handleReject = async (apptId: number) => {
+    setApptMsg("");
+    setApptError("");
+    setBusyApptId(apptId);
+    try {
+      await API.post(`/appointments/appointments/${apptId}/reject/`);
+      setApptMsg("Appointment cancelled.");
+      fetchAppointments();
+    } catch (err: any) {
+      console.error(err);
+      const detail =
+        err.response?.data?.error ||
+        err.response?.data?.detail ||
+        "Could not cancel the appointment.";
+      setApptError(detail);
+    } finally {
+      setBusyApptId(null);
+    }
+  };
+
+  const pendingAppointments = appointments.filter((appt) => appt.status === "pending");
+
+  const formatDateTime = (value: string) => {
+    try {
+      return new Date(value).toLocaleString();
+    } catch {
+      return value;
+    }
+  };
 
   const getBadgeClass = (risk: MotherProfile["risk_level"]) => {
     switch (risk) {
@@ -171,6 +249,42 @@ const NurseDashboard = () => {
           </>
         ) : (
           <p className="alerts-empty">No clinics are available yet.</p>
+        )}
+      </section>
+
+      <section className="alerts-panel">
+        <h2>Pending Appointments</h2>
+        {apptMsg && <p className="assignment-success">{apptMsg}</p>}
+        {apptError && <p className="assignment-error">{apptError}</p>}
+        {pendingAppointments.length ? (
+          pendingAppointments.map((appt) => (
+            <div key={appt.id} className="appointment-card">
+              <div className="appointment-card-body">
+                <p className="appointment-mother">{appt.mother_name || "Unknown mother"}</p>
+                <p><strong>Clinic:</strong> {appt.clinic_display || "Unassigned"}</p>
+                <p><strong>When:</strong> {formatDateTime(appt.date_time)}</p>
+                {appt.reason && <p><strong>Reason:</strong> {appt.reason}</p>}
+              </div>
+              <div className="appointment-actions">
+                <button
+                  onClick={() => handleApprove(appt.id)}
+                  disabled={busyApptId === appt.id}
+                  className="approve-button"
+                >
+                  {busyApptId === appt.id ? "Saving..." : "Approve"}
+                </button>
+                <button
+                  onClick={() => handleReject(appt.id)}
+                  disabled={busyApptId === appt.id}
+                  className="reject-button"
+                >
+                  {busyApptId === appt.id ? "Saving..." : "Reject"}
+                </button>
+              </div>
+            </div>
+          ))
+        ) : (
+          <p className="alerts-empty">No pending appointments for your clinic.</p>
         )}
       </section>
 

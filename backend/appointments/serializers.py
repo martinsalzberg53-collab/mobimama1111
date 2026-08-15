@@ -15,10 +15,30 @@ class AppointmentSerializer(serializers.ModelSerializer):
     clinic_name = serializers.PrimaryKeyRelatedField(
         queryset=Clinic.objects.all(), required=False, allow_null=True
     )
+    mother_name = serializers.SerializerMethodField()
+    nurse_name = serializers.SerializerMethodField()
+    clinic_display = serializers.SerializerMethodField()
+
+    def get_mother_name(self, obj):
+        if obj.mother and obj.mother.user:
+            first = obj.mother.user.first_name or ''
+            last = obj.mother.user.last_name or ''
+            return f"{first} {last}".strip() or obj.mother.user.email
+        return ''
+
+    def get_nurse_name(self, obj):
+        if obj.nurse:
+            first = obj.nurse.first_name or ''
+            last = obj.nurse.last_name or ''
+            return f"{first} {last}".strip()
+        return ''
+
+    def get_clinic_display(self, obj):
+        return obj.clinic_name.name if obj.clinic_name else ''
 
     class Meta:
         model = Appointment
-        fields = ['id', 'mother', 'nurse', 'clinic_name', 'date_time', 'reason', 'status', 'created_at', 'updated_at']
+        fields = ['id', 'mother', 'nurse', 'clinic_name', 'date_time', 'reason', 'status', 'created_at', 'updated_at', 'mother_name', 'nurse_name', 'clinic_display']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def create(self, validated_data):

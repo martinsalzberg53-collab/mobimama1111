@@ -53,6 +53,20 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         if self._normalize_role(getattr(user, 'role', None)) != 'NURSE':
             return Response({'error': 'Only nurses can approve appointments.'}, status=status.HTTP_403_FORBIDDEN)
         appointment.status = 'approved'
+        if not appointment.nurse:
+            appointment.nurse = user
+        appointment.save()
+        serializer = self.get_serializer(appointment)
+        return Response(serializer.data)
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        """Custom action to reject an appointment (nurse only)."""
+        appointment = self.get_object()
+        user = request.user
+        if self._normalize_role(getattr(user, 'role', None)) != 'NURSE':
+            return Response({'error': 'Only nurses can reject appointments.'}, status=status.HTTP_403_FORBIDDEN)
+        appointment.status = 'cancelled'
         appointment.save()
         serializer = self.get_serializer(appointment)
         return Response(serializer.data)

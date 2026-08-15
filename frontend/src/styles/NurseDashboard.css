@@ -233,6 +233,82 @@
   font-weight: 600;
 }
 
+.appointment-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+.appointment-card-body p {
+  margin: 4px 0;
+  color: #334155;
+}
+
+.appointment-mother {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.appointment-actions {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.approve-button,
+.reject-button {
+  border: none;
+  border-radius: 12px;
+  padding: 10px 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.approve-button {
+  background: #059669;
+  color: white;
+}
+
+.approve-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(5, 150, 105, 0.18);
+}
+
+.reject-button {
+  background: #dc2626;
+  color: white;
+}
+
+.reject-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(220, 38, 38, 0.18);
+}
+
+.approve-button:disabled,
+.reject-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.assignment-success {
+  color: #047857;
+  font-weight: 600;
+}
+
+.assignment-error {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
 @media (max-width: 850px) {
   .dashboard-header {
     flex-direction: column;

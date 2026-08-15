@@ -24,8 +24,9 @@ class MotherProfileViewSet(viewsets.ModelViewSet):
             return MotherProfile.objects.filter(user=user)
 
         if role == 'NURSE':
-            # Nurses can view all mother profiles and manage care for patients across clinics.
-            return MotherProfile.objects.all()
+            # Nurses see only their own patients (mothers with an appointment
+            # assigned to them), so each patient is managed by one nurse.
+            return MotherProfile.objects.filter(appointment__nurse=user).distinct()
 
         return MotherProfile.objects.none()
 
