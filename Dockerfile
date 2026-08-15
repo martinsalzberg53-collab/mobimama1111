@@ -32,4 +32,4 @@ EXPOSE 10000
 
 WORKDIR /app/backend
 
-CMD ["sh", "-c", "python manage.py migrate --noinput && gunicorn backend.wsgi:application --bind 0.0.0.0:${PORT:-10000}"]
+CMD ["sh", "-c", "python manage.py migrate --noinput && python manage.py bootstrap && gunicorn backend.wsgi:application --bind 0.0.0.0:${PORT:-10000}"]
