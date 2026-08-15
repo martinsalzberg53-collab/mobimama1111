@@ -79,7 +79,22 @@ const MotherAppointments = () => {
       fetchAppointments();
     } catch (err: any) {
       console.error(err);
-      setError(err.response?.data?.detail || "Could not book appointment.");
+      const data = err.response?.data;
+      let msg = "Could not book appointment.";
+      if (typeof data === "string") {
+        msg = data;
+      } else if (data && typeof data === "object") {
+        if (data.detail) {
+          msg = data.detail;
+        } else {
+          const parts = Object.entries(data).map(([key, value]) => {
+            const text = Array.isArray(value) ? value.join(", ") : String(value);
+            return `${key}: ${text}`;
+          });
+          if (parts.length) msg = parts.join("; ");
+        }
+      }
+      setError(msg);
     }
   };
 

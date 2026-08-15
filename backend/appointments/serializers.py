@@ -29,10 +29,8 @@ class AppointmentSerializer(serializers.ModelSerializer):
             role = role.upper()
 
         if role == 'MOTHER':
-            if hasattr(user, 'motherprofile'):
-                validated_data['mother'] = user.motherprofile
-            else:
-                raise serializers.ValidationError('You must have a mother profile to create an appointment.')
+            profile, _ = MotherProfile.objects.get_or_create(user=user)
+            validated_data['mother'] = profile
 
         elif role == 'NURSE':
             if 'mother' not in validated_data:
