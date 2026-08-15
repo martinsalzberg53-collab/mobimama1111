@@ -1,0 +1,91 @@
+.symptom-tracker-container {
+  max-width: 750px;
+  margin: 30px auto;
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  color: #1f2937;
+  font-family: Inter, system-ui, sans-serif;
+}
+
+.symptom-tracker-container h2 {
+  margin: 0 0 6px;
+  color: #7c3aed;
+}
+
+.tracker-hint {
+  color: #64748b;
+  margin: 0 0 22px;
+}
+
+.symptom-tracker-container h3 {
+  margin: 20px 0 10px;
+  color: #334155;
+}
+
+.symptom-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  color: #334155;
+  font-weight: 500;
+}
+
+.symptom-check input {
+  width: 18px;
+  height: 18px;
+}
+
+.symptom-select-label {
+  display: grid;
+  gap: 8px;
+  margin: 20px 0 18px;
+  color: #334155;
+  font-weight: 600;
+}
+
+.symptom-select-label select {
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  width: 100%;
+}
+
+.analyze-button {
+  border: none;
+  background: #4f46e5;
+  color: white;
+  border-radius: 14px;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.analyze-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(79, 70, 229, 0.18);
+}
+
+.tracker-result {
+  margin-top: 22px;
+  padding: 18px;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: 2px solid;
+}
+
+.tracker-success {
+  margin-top: 14px;
+  color: #047857;
+  font-weight: 600;
+}
+
+.tracker-error {
+  margin-top: 14px;
+  color: #b91c1c;
+  font-weight: 600;
+}

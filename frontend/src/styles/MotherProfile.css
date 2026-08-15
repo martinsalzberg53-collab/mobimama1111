@@ -44,6 +44,8 @@
 
 .profile-field {
   display: flex;
+  flex-direction: column;
+  gap: 6px;
   margin-bottom: 0.75rem;
   font-size: 1rem;
 }
@@ -56,4 +58,40 @@
 
 .profile-field .value {
   color: #222;
+}
+
+.profile-field input,
+.profile-field select {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  max-width: 340px;
+}
+
+.profile-save-button {
+  border: none;
+  background: #0056b3;
+  color: white;
+  border-radius: 10px;
+  padding: 10px 22px;
+  cursor: pointer;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.profile-save-button:hover {
+  background: #004494;
+}
+
+.profile-success {
+  color: #047857;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.profile-error {
+  color: #b91c1c;
+  font-weight: 600;
+  margin-top: 10px;
 }

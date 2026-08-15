@@ -18,6 +18,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
     mother_name = serializers.SerializerMethodField()
     nurse_name = serializers.SerializerMethodField()
     clinic_display = serializers.SerializerMethodField()
+    mother_summary = serializers.SerializerMethodField()
 
     def get_mother_name(self, obj):
         if obj.mother and obj.mother.user:
@@ -36,9 +37,22 @@ class AppointmentSerializer(serializers.ModelSerializer):
     def get_clinic_display(self, obj):
         return obj.clinic_name.name if obj.clinic_name else ''
 
+    def get_mother_summary(self, obj):
+        m = obj.mother
+        if not m:
+            return None
+        return {
+            'name': self.get_mother_name(obj),
+            'risk_level': m.get_risk_level(),
+            'risk_reasons': m.get_risk_reasons(),
+            'due_date': m.due_date,
+            'phone_number': m.phone_number,
+            'indicators': m.health_info or {},
+        }
+
     class Meta:
         model = Appointment
-        fields = ['id', 'mother', 'nurse', 'clinic_name', 'date_time', 'reason', 'status', 'created_at', 'updated_at', 'mother_name', 'nurse_name', 'clinic_display']
+        fields = ['id', 'mother', 'nurse', 'clinic_name', 'date_time', 'reason', 'status', 'created_at', 'updated_at', 'mother_name', 'nurse_name', 'clinic_display', 'mother_summary']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def create(self, validated_data):

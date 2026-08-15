@@ -1,4 +1,6 @@
 import { useState } from "react";
+import API from "../api/axios";
+import "../styles/SymptomTracker.css";
 
 export default function SymptomTracker() {
   const [formData, setFormData] = useState({
@@ -13,6 +15,8 @@ export default function SymptomTracker() {
 
   const [riskLevel, setRiskLevel] = useState("");
   const [recommendation, setRecommendation] = useState("");
+  const [saveMsg, setSaveMsg] = useState("");
+  const [saveError, setSaveError] = useState("");
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -28,6 +32,39 @@ export default function SymptomTracker() {
     });
   };
 
+  const getRiskColor = () => {
+    if (riskLevel === "High") return "#dc2626";
+    if (riskLevel === "Medium") return "#f59e0b";
+    return "#059669";
+  };
+
+  const saveToProfile = async (symptoms: string[], fetalMovement: string) => {
+    setSaveMsg("");
+    setSaveError("");
+    try {
+      const profileRes = await API.get<{ id: number }[]>("/mothers/profiles/");
+      const profile = profileRes.data[0];
+      if (!profile) {
+        setSaveError("No mother profile found. Please contact support.");
+        return;
+      }
+      await API.patch(`/mothers/profiles/${profile.id}/`, {
+        health_info: {
+          symptoms,
+          fetal_movement: fetalMovement,
+          last_updated: new Date().toISOString(),
+        },
+      });
+      setSaveMsg("Saved to your profile and sent to your nurse.");
+    } catch (err: any) {
+      console.error(err);
+      setSaveError(
+        err.response?.data?.detail ||
+        "Could not save your symptoms. Please try again."
+      );
+    }
+  };
+
   const analyzeSymptoms = () => {
     let risk = "Low";
     let advice =
@@ -37,17 +74,17 @@ export default function SymptomTracker() {
     if (formData.bleeding) {
       risk = "High";
       advice =
-        "⚠️ Bleeding during pregnancy is serious. Go to the nearest hospital immediately.";
+        "Bleeding during pregnancy is serious. Go to the nearest hospital immediately.";
     } 
     else if (formData.babyMovement === "No Movement") {
       risk = "High";
       advice =
-        "⚠️ No baby movement detected. Seek emergency medical attention immediately.";
+        "No baby movement detected. Seek emergency medical attention immediately.";
     } 
     else if (formData.headache && formData.blurredVision) {
       risk = "High";
       advice =
-        "⚠️ Headache with blurred vision may indicate pre-eclampsia. Seek urgent care.";
+        "Headache with blurred vision may indicate pre-eclampsia. Seek urgent care.";
     }
 
     // MEDIUM RISK CONDITIONS
@@ -74,21 +111,29 @@ export default function SymptomTracker() {
 
     setRiskLevel(risk);
     setRecommendation(advice);
-  };
 
-  const getRiskColor = () => {
-    if (riskLevel === "High") return "red";
-    if (riskLevel === "Medium") return "orange";
-    return "green";
+    const symptoms: string[] = [];
+    if (formData.headache) symptoms.push("headache");
+    if (formData.blurredVision) symptoms.push("blurred_vision");
+    if (formData.swelling) symptoms.push("swelling");
+    if (formData.bleeding) symptoms.push("bleeding");
+    if (formData.fever) symptoms.push("fever");
+    if (formData.vomiting) symptoms.push("vomiting");
+
+    saveToProfile(symptoms, formData.babyMovement.toLowerCase());
   };
 
   return (
-    <div style={{ maxWidth: "750px", margin: "30px auto", padding: "20px" }}>
-      <h2>🩺 Maternal Symptom Tracker</h2>
+    <div className="symptom-tracker-container">
+      <h2>Maternal Symptom Tracker</h2>
+      <p className="tracker-hint">
+        Your answers are saved to your profile so your nurse can see how you
+        are feeling.
+      </p>
 
       <h3>Symptoms</h3>
 
-      <label>
+      <label className="symptom-check">
         <input
           type="checkbox"
           name="headache"
@@ -98,9 +143,7 @@ export default function SymptomTracker() {
         Headache
       </label>
 
-      <br />
-
-      <label>
+      <label className="symptom-check">
         <input
           type="checkbox"
           name="blurredVision"
@@ -110,9 +153,7 @@ export default function SymptomTracker() {
         Blurred Vision
       </label>
 
-      <br />
-
-      <label>
+      <label className="symptom-check">
         <input
           type="checkbox"
           name="swelling"
@@ -122,9 +163,7 @@ export default function SymptomTracker() {
         Swelling
       </label>
 
-      <br />
-
-      <label>
+      <label className="symptom-check">
         <input
           type="checkbox"
           name="bleeding"
@@ -134,9 +173,7 @@ export default function SymptomTracker() {
         Bleeding
       </label>
 
-      <br />
-
-      <label>
+      <label className="symptom-check">
         <input
           type="checkbox"
           name="fever"
@@ -146,9 +183,7 @@ export default function SymptomTracker() {
         Fever
       </label>
 
-      <br />
-
-      <label>
+      <label className="symptom-check">
         <input
           type="checkbox"
           name="vomiting"
@@ -158,47 +193,38 @@ export default function SymptomTracker() {
         Vomiting
       </label>
 
-      <br /><br />
+      <label className="symptom-select-label">
+        Baby Movement
+        <select
+          name="babyMovement"
+          value={formData.babyMovement}
+          onChange={handleChange}
+        >
+          <option>Normal</option>
+          <option>Reduced</option>
+          <option>No Movement</option>
+        </select>
+      </label>
 
-      {/* BABY MOVEMENT */}
-      <label>Baby Movement</label>
-      <select
-        name="babyMovement"
-        value={formData.babyMovement}
-        onChange={handleChange}
-      >
-        <option>Normal</option>
-        <option>Reduced</option>
-        <option>No Movement</option>
-      </select>
-
-      <br /><br />
-
-      {/* BUTTON */}
-      <button onClick={analyzeSymptoms}>
+      <button className="analyze-button" onClick={analyzeSymptoms}>
         Analyze Symptoms
       </button>
 
-      {/* RESULT */}
+      {saveMsg && <p className="tracker-success">{saveMsg}</p>}
+      {saveError && <p className="tracker-error">{saveError}</p>}
+
       {riskLevel && (
         <div
-          style={{
-            marginTop: "20px",
-            padding: "15px",
-            borderRadius: "10px",
-            background: "#f8f8f8",
-            border: `2px solid ${getRiskColor()}`,
-          }}
+          className="tracker-result"
+          style={{ borderColor: getRiskColor() }}
         >
           <h3>AI Risk Analysis</h3>
-
           <p>
             <strong>Risk Level:</strong>{" "}
             <span style={{ color: getRiskColor(), fontWeight: "bold" }}>
               {riskLevel}
             </span>
           </p>
-
           <p>
             <strong>Recommendation:</strong> {recommendation}
           </p>

@@ -263,6 +263,18 @@
   color: #1f2937;
 }
 
+.appointment-mother-info {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 12px;
+  margin: 8px 0;
+}
+
+.mother-risk-reasons {
+  color: #b91c1c;
+  font-weight: 600;
+}
+
 .appointment-actions {
   display: flex;
   gap: 12px;

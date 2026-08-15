@@ -27,10 +27,10 @@ class MotherProfile(models.Model):
         symptoms = info.get('symptoms', []) or []
         fetal_movement = info.get('fetal_movement')
 
-        if 'severe_pain' in symptoms or 'heavy_bleeding' in symptoms:
+        if any(s in symptoms for s in ('heavy_bleeding', 'severe_pain', 'bleeding')):
             reasons.append('Serious reported symptoms')
-        if fetal_movement is not None and fetal_movement == 'reduced':
-            reasons.append('Reduced fetal movement')
+        if fetal_movement in ('reduced', 'no movement'):
+            reasons.append('Reduced or no fetal movement')
 
         return reasons
 
@@ -41,11 +41,11 @@ class MotherProfile(models.Model):
 
         info = self.health_info or {}
         symptoms = info.get('symptoms', []) or []
+        fetal_movement = info.get('fetal_movement')
 
-        if any([
-            'heavy_bleeding' in symptoms,
-            'severe_pain' in symptoms,
-        ]):
+        if any(s in symptoms for s in ('heavy_bleeding', 'severe_pain', 'bleeding')):
+            return 'High'
+        if fetal_movement == 'no movement':
             return 'High'
 
         return 'Medium'

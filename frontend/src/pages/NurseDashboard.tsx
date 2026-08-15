@@ -40,6 +40,14 @@ type Appointment = {
   mother_name: string;
   nurse_name: string;
   clinic_display: string;
+  mother_summary: {
+    name: string;
+    risk_level: "Low" | "Medium" | "High";
+    risk_reasons: string[];
+    due_date: string | null;
+    phone_number: string | null;
+    indicators: Record<string, any>;
+  } | null;
 };
 
 const NurseDashboard = () => {
@@ -262,6 +270,32 @@ const NurseDashboard = () => {
             <div key={appt.id} className="appointment-card">
               <div className="appointment-card-body">
                 <p className="appointment-mother">{appt.mother_name || "Unknown mother"}</p>
+                {appt.mother_summary && (
+                  <div className="appointment-mother-info">
+                    <span className={getBadgeClass(appt.mother_summary.risk_level)}>
+                      {appt.mother_summary.risk_level}
+                    </span>
+                    {appt.mother_summary.risk_reasons.length > 0 && (
+                      <p className="mother-risk-reasons">
+                        {appt.mother_summary.risk_reasons.join("; ")}
+                      </p>
+                    )}
+                    <p><strong>Due:</strong> {appt.mother_summary.due_date || "Unknown"}</p>
+                    <p><strong>Phone:</strong> {appt.mother_summary.phone_number || "Unknown"}</p>
+                    {(() => {
+                      const symptoms: string[] = appt.mother_summary.indicators.symptoms || [];
+                      const fetal = appt.mother_summary.indicators.fetal_movement;
+                      return (
+                        <>
+                          {symptoms.length > 0 && (
+                            <p><strong>Symptoms:</strong> {symptoms.join(", ").replace(/_/g, " ")}</p>
+                          )}
+                          {fetal && <p><strong>Fetal movement:</strong> {fetal}</p>}
+                        </>
+                      );
+                    })()}
+                  </div>
+                )}
                 <p><strong>Clinic:</strong> {appt.clinic_display || "Unassigned"}</p>
                 <p><strong>When:</strong> {formatDateTime(appt.date_time)}</p>
                 {appt.reason && <p><strong>Reason:</strong> {appt.reason}</p>}
