@@ -254,6 +254,7 @@ const NurseDashboard = () => {
 
       <section className="alerts-panel">
         <h2>Pending Appointments</h2>
+        <p className="alerts-hint">Approving an appointment assigns that mother to you (one patient, one nurse).</p>
         {apptMsg && <p className="assignment-success">{apptMsg}</p>}
         {apptError && <p className="assignment-error">{apptError}</p>}
         {pendingAppointments.length ? (
@@ -312,28 +313,34 @@ const NurseDashboard = () => {
 
       <section className="mother-grid-section">
         <h2>Assigned Patients</h2>
-        <div className="mother-grid">
-          {mothers.map((mother) => (
-            <div key={mother.id} className="mother-card">
-              <div className="mother-card-header">
-                <h3>{mother.user.first_name} {mother.user.last_name}</h3>
-                <span className={getBadgeClass(mother.risk_level)}>{mother.risk_level}</span>
+        {mothers.length ? (
+          <div className="mother-grid">
+            {mothers.map((mother) => (
+              <div key={mother.id} className="mother-card">
+                <div className="mother-card-header">
+                  <h3>{mother.user.first_name} {mother.user.last_name}</h3>
+                  <span className={getBadgeClass(mother.risk_level)}>{mother.risk_level}</span>
+                </div>
+                <p><strong>Clinic:</strong> {mother.clinic_name || "Not assigned"}</p>
+                <p><strong>Due:</strong> {mother.due_date || "Unknown"}</p>
+                <p><strong>Phone:</strong> {mother.phone_number || "Unknown"}</p>
+                <p className="health-info-label">Latest indicators:</p>
+                <div className="health-info-grid">
+                  {Object.entries(mother.health_info || {}).map(([key, value]) => (
+                    <div key={key} className="health-info-item">
+                      <span className="health-info-key">{key.replace(/_/g, " ")}</span>
+                      <strong>{String(value)}</strong>
+                    </div>
+                  ))}
+                </div>
               </div>
-              <p><strong>Clinic:</strong> {mother.clinic_name || "Not assigned"}</p>
-              <p><strong>Due:</strong> {mother.due_date || "Unknown"}</p>
-              <p><strong>Phone:</strong> {mother.phone_number || "Unknown"}</p>
-              <p className="health-info-label">Latest indicators:</p>
-              <div className="health-info-grid">
-                {Object.entries(mother.health_info || {}).map(([key, value]) => (
-                  <div key={key} className="health-info-item">
-                    <span className="health-info-key">{key.replace(/_/g, " ")}</span>
-                    <strong>{String(value)}</strong>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        ) : (
+          <p className="alerts-empty">
+            No patients assigned to you yet. Approve a pending appointment to take on a patient.
+          </p>
+        )}
       </section>
 
       <section className="hospital-list-section">

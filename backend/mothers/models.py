@@ -7,6 +7,10 @@ from clinics.models import Clinic
 
 class MotherProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    assigned_nurse = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='assigned_mothers'
+    )
     due_date = models.DateField(null=True, blank=True)
     clinic_name = models.CharField(max_length=100, blank=True, null=True)  # MVP: clinic as string
     health_info = models.JSONField(default=dict, blank=True)  # vitals, symptoms, AI data

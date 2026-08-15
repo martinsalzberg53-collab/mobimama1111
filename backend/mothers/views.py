@@ -24,8 +24,9 @@ class MotherProfileViewSet(viewsets.ModelViewSet):
             return MotherProfile.objects.filter(user=user)
 
         if role == 'NURSE':
-            # Nurses can view all mother profiles and manage care for patients across clinics.
-            return MotherProfile.objects.all()
+            # Strict model: each mother is assigned to exactly one nurse,
+            # so nurses only see mothers assigned to them.
+            return MotherProfile.objects.filter(assigned_nurse=user)
 
         return MotherProfile.objects.none()
 

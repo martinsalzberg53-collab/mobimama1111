@@ -1,5 +1,6 @@
 from django.shortcuts import render
 
+from django.db.models import Q
 from rest_framework import viewsets, permissions, status, serializers
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -27,7 +28,11 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
         if role == 'NURSE':
             assigned_clinics = user.nurseassignment_set.values_list('clinic', flat=True)
-            return Appointment.objects.filter(clinic_name__id__in=assigned_clinics)
+            # Nurses see pending (unassigned) appointments at their clinic to
+            # triage, plus appointments for mothers already assigned to them.
+            return Appointment.objects.filter(clinic_name__id__in=assigned_clinics).filter(
+                Q(mother__assigned_nurse=user) | Q(mother__assigned_nurse__isnull=True)
+            )
 
         return Appointment.objects.all()
 
@@ -52,9 +57,16 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         user = request.user
         if self._normalize_role(getattr(user, 'role', None)) != 'NURSE':
             return Response({'error': 'Only nurses can approve appointments.'}, status=status.HTTP_403_FORBIDDEN)
+        if appointment.mother and appointment.mother.assigned_nurse and appointment.mother.assigned_nurse != user:
+            return Response(
+                {'error': 'This mother is already assigned to another nurse.'},
+                status=status.HTTP_403_FORBIDDEN,
+            )
         appointment.status = 'approved'
-        if not appointment.nurse:
-            appointment.nurse = user
+        appointment.nurse = user
+        if appointment.mother:
+            appointment.mother.assigned_nurse = user
+            appointment.mother.save(update_fields=['assigned_nurse'])
         appointment.save()
         serializer = self.get_serializer(appointment)
         return Response(serializer.data)

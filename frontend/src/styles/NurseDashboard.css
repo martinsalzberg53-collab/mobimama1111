@@ -73,6 +73,12 @@
   border-radius: 12px;
 }
 
+.alerts-hint {
+  color: #64748b;
+  font-size: 0.9rem;
+  margin: 0 0 12px;
+}
+
 .mother-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));

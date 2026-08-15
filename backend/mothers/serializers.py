@@ -1,16 +1,29 @@
 from rest_framework import serializers
 from mothers.models import MotherProfile, Message
 from users.serializers import UserSerializer
+from users.models import User
 
 class MotherProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
+    assigned_nurse = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.filter(role__iexact='NURSE'),
+        required=False, allow_null=True
+    )
+    assigned_nurse_name = serializers.SerializerMethodField()
     risk_level = serializers.SerializerMethodField()
     risk_reasons = serializers.SerializerMethodField()
 
     class Meta:
         model = MotherProfile
-        fields = ['id', 'user', 'due_date', 'clinic_name', 'health_info', 'ai_insights', 'phone_number', 'risk_level', 'risk_reasons']
-        read_only_fields = ['id', 'ai_insights', 'risk_level', 'risk_reasons', 'user']
+        fields = ['id', 'user', 'assigned_nurse', 'assigned_nurse_name', 'due_date', 'clinic_name', 'health_info', 'ai_insights', 'phone_number', 'risk_level', 'risk_reasons']
+        read_only_fields = ['id', 'ai_insights', 'risk_level', 'risk_reasons', 'user', 'assigned_nurse_name']
+
+    def get_assigned_nurse_name(self, instance):
+        if instance.assigned_nurse:
+            first = instance.assigned_nurse.first_name or ''
+            last = instance.assigned_nurse.last_name or ''
+            return f"{first} {last}".strip() or instance.assigned_nurse.email
+        return ''
 
     def get_risk_level(self, instance):
         return instance.get_risk_level()
