@@ -10,29 +10,38 @@ type Clinic = {
   phone_number: string;
 };
 
+type MotherProfile = {
+  id: number;
+  phone_number: string | null;
+  due_date: string | null;
+};
+
 type Appointment = {
   id: number;
-  mother: number;
-  nurse: number | null;
   clinic_name: number | null;
   date_time: string;
   reason: string;
   status: string;
+  clinic_display: string;
 };
 
 const MotherAppointments = () => {
   const { user } = useUser();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [clinics, setClinics] = useState<Clinic[]>([]);
+  const [profile, setProfile] = useState<MotherProfile | null>(null);
   const [selectedClinic, setSelectedClinic] = useState<number | null>(null);
   const [dateTime, setDateTime] = useState("");
   const [reason, setReason] = useState("");
+  const [phone, setPhone] = useState("");
+  const [dueDate, setDueDate] = useState("");
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
   useEffect(() => {
     fetchAppointments();
     fetchClinics();
+    fetchProfile();
   }, []);
 
   const fetchAppointments = async () => {
@@ -57,6 +66,35 @@ const MotherAppointments = () => {
     }
   };
 
+  const fetchProfile = async () => {
+    try {
+      const response = await API.get<MotherProfile[]>("/mothers/profiles/");
+      const p = response.data[0];
+      if (p) {
+        setProfile(p);
+        setPhone(p.phone_number || "");
+        setDueDate(p.due_date || "");
+      }
+    } catch {
+      // Profile doesn't exist yet; will be created on first booking.
+    }
+  };
+
+  const saveProfile = async () => {
+    if (profile) {
+      await API.patch(`/mothers/profiles/${profile.id}/`, {
+        phone_number: phone,
+        due_date: dueDate || null,
+      });
+    } else {
+      const res = await API.post("/mothers/profiles/", {
+        phone_number: phone,
+        due_date: dueDate || null,
+      });
+      setProfile(res.data);
+    }
+  };
+
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
     setError("");
@@ -67,7 +105,13 @@ const MotherAppointments = () => {
       return;
     }
 
+    if (!phone.trim()) {
+      setError("Please enter your phone number so the nurse can contact you.");
+      return;
+    }
+
     try {
+      await saveProfile();
       await API.post("/appointments/appointments/", {
         clinic_name: selectedClinic,
         date_time: dateTime,
@@ -132,6 +176,26 @@ const MotherAppointments = () => {
             </label>
 
             <label>
+              Phone number
+              <input
+                type="tel"
+                value={phone}
+                placeholder="e.g. 024 000 0000"
+                onChange={(e) => setPhone(e.target.value)}
+                required
+              />
+            </label>
+
+            <label>
+              Due date
+              <input
+                type="date"
+                value={dueDate}
+                onChange={(e) => setDueDate(e.target.value)}
+              />
+            </label>
+
+            <label>
               Date & time
               <input
                 type="datetime-local"
@@ -185,6 +249,9 @@ const MotherAppointments = () => {
               <li className="appointment-card" key={appointment.id}>
                 <span className="appointment-date">
                   {new Date(appointment.date_time).toLocaleString()}
+                </span>
+                <span className="appointment-clinic">
+                  {appointment.clinic_display || "Unknown clinic"}
                 </span>
                 <span className="appointment-status">Status: {appointment.status}</span>
                 <p className="appointment-reason">{appointment.reason}</p>
