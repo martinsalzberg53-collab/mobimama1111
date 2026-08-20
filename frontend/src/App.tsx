@@ -9,6 +9,7 @@ import MotherDashboard from "./pages/MotherDashboard";
 import MotherProfile from "./pages/MotherProfile";
 import MotherAppointments from "./pages/MotherAppointments";
 import NurseDashboard from "./pages/NurseDashboard";
+import NurseProfile from "./pages/NurseProfile";
 
 import Chat from "./pages/Chat";
 import SymptomTracker from "./pages/SymptomTracker";
@@ -27,6 +28,7 @@ function App() {
         <Route path="/motherprofile" element={<MotherProfile />} />
         <Route path="/motherappointments" element={<MotherAppointments />} />
         <Route path="/NurseDashboard" element={<NurseDashboard />} />
+        <Route path="/nurse-profile" element={<NurseProfile />} />
 
         <Route path="/chat" element={<Chat />} />
         <Route path="/symptom-tracker" element={<SymptomTracker />} />
