@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { LanguageProvider } from "./context/LanguageContext";
 import Navbar from "./components/Navbar";
+import OfflineBanner from "./components/OfflineBanner";
 
 import Home from "./pages/Home";
 import Login from "./pages/Login";
@@ -16,8 +18,9 @@ import SymptomTracker from "./pages/SymptomTracker";
 
 function App() {
   return (
-    <BrowserRouter>
-      <Navbar />
+    <LanguageProvider>
+      <BrowserRouter>
+        <Navbar />
 
       <Routes>
         <Route path="/" element={<Home />} />
@@ -33,7 +36,9 @@ function App() {
         <Route path="/chat" element={<Chat />} />
         <Route path="/symptom-tracker" element={<SymptomTracker />} />
       </Routes>
-    </BrowserRouter>
+        </BrowserRouter>
+        <OfflineBanner />
+    </LanguageProvider>
   );
 }
 

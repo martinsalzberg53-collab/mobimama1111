@@ -1,57 +1,54 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
+import { useLanguage } from "../context/LanguageContext";
 import "../styles/Navbar.css";
 
-// Helper function to handle active NavLink styling
-// This will add the class "active-link" to the NavLink that matches the current URL
 const getNavLinkClass = ({ isActive }: { isActive: boolean }) => {
   return isActive ? "nav-link active-link" : "nav-link";
 };
 
 const Navbar = () => {
   const { user, logout } = useUser();
+  const { t, language, setLanguage, languages } = useLanguage();
   const navigate = useNavigate();
 
   const handleLogout = () => {
     logout();
-    navigate("/login"); // Redirect to login page after logout
+    navigate("/login");
   };
 
-  // --- Links for Logged-Out Users ---
   const guestLinks = (
     <>
       <NavLink to="/login" className={getNavLinkClass}>
-        Login
+        {t("nav.login")}
       </NavLink>
       <NavLink to="/register" className="nav-link cta-button">
-        Sign Up
+        {t("nav.signUp")}
       </NavLink>
     </>
   );
 
-  // --- Links for "Mother" Role ---
   const motherLinks = (
     <>
       <NavLink to="/MotherDashboard" className={getNavLinkClass}>
-        Dashboard
+        {t("nav.dashboard")}
       </NavLink>
       <NavLink to="/motherprofile" className={getNavLinkClass}>
-        Profile
+        {t("nav.profile")}
       </NavLink>
       <NavLink to="/motherappointments" className={getNavLinkClass}>
-        Appointments
+        {t("nav.appointments")}
       </NavLink>
     </>
   );
 
-  // --- Links for "Nurse" Role ---
   const nurseLinks = (
     <>
       <NavLink to="/NurseDashboard" className={getNavLinkClass}>
-        Dashboard
+        {t("nav.dashboard")}
       </NavLink>
       <NavLink to="/nurse-profile" className={getNavLinkClass}>
-        Profile
+        {t("nav.profile")}
       </NavLink>
     </>
   );
@@ -67,20 +64,29 @@ const Navbar = () => {
       <div className="navbar-links">
         {user ? (
           <>
-            {/* We use user.first_name, which we get from our API */}
-            <span className="navbar-greeting">Hi, {user.first_name}!</span>
+            <span className="navbar-greeting">{t("nav.hi")}, {user.first_name}!</span>
 
-            {/* Render links based on user role */}
             {user.role === "MOTHER" && motherLinks}
             {user.role === "NURSE" && nurseLinks}
 
             <button onClick={handleLogout} className="logout-button">
-              Logout
+              {t("nav.logout")}
             </button>
           </>
         ) : (
           guestLinks
         )}
+
+        <select
+          className="language-switcher"
+          value={language}
+          onChange={(e) => setLanguage(e.target.value)}
+          aria-label="Language"
+        >
+          {Object.entries(languages).map(([code, { label }]) => (
+            <option key={code} value={code}>{label}</option>
+          ))}
+        </select>
       </div>
     </nav>
   );

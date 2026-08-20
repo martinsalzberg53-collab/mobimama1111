@@ -57,6 +57,7 @@ INSTALLED_APPS = [
     'mothers',
     'tips',
     'appointments',
+    'sms',
 ]
 
 MIDDLEWARE = [

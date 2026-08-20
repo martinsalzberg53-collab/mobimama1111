@@ -1,5 +1,6 @@
 import { useState } from "react";
 import API from "../api/axios";
+import { useLanguage } from "../context/LanguageContext";
 
 interface Message {
   sender: "user" | "bot";
@@ -7,10 +8,11 @@ interface Message {
 }
 
 export default function Chat() {
+  const { t, language } = useLanguage();
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: "bot",
-      text: "👋 Hi! I'm Mobi AI. Ask me anything or speak in Twi 🎤",
+      text: t("chat.welcome"),
     },
   ]);
 
@@ -21,7 +23,6 @@ export default function Chat() {
   const [mediaRecorder, setMediaRecorder] =
     useState<MediaRecorder | null>(null);
 
-  // ---------------- TEXT CHAT ----------------
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
 
@@ -38,7 +39,7 @@ export default function Chat() {
     try {
       const res = await API.post(
         "/chat/",
-        { message: userMessage },
+        { message: userMessage, language },
         { timeout: 15000 }
       );
 
@@ -55,7 +56,7 @@ export default function Chat() {
           sender: "bot",
           text:
             err?.response?.data?.error ||
-            "❌ Error connecting to Mobi AI (backend failed)",
+            t("chat.error"),
         },
       ]);
     }
@@ -63,7 +64,6 @@ export default function Chat() {
     setLoading(false);
   };
 
-  // ---------------- VOICE CHAT ----------------
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -82,6 +82,7 @@ export default function Chat() {
 
         const formData = new FormData();
         formData.append("audio", audioBlob);
+        formData.append("language", language);
 
         try {
           const res = await API.post(
@@ -133,10 +134,12 @@ export default function Chat() {
     setRecording(false);
   };
 
-  // ---------------- UI ----------------
   return (
-    <div style={{ maxWidth: 800, margin: "30px auto" }}>
-      <h2>🤖 Mobi AI Chat</h2>
+    <div style={{ maxWidth: 800, margin: "30px auto", padding: "0 16px" }}>
+      <h2>{t("chat.title")}</h2>
+      <p style={{ color: "#64748b", marginBottom: 16 }}>
+        {t("chat.subtitle")}
+      </p>
 
       <div
         style={{
@@ -145,6 +148,7 @@ export default function Chat() {
           border: "1px solid #ddd",
           padding: 10,
           background: "#f9f9f9",
+          borderRadius: 12,
         }}
       >
         {messages.map((m, i) => (
@@ -161,7 +165,7 @@ export default function Chat() {
                 padding: 10,
                 borderRadius: 10,
                 background:
-                  m.sender === "user" ? "#007bff" : "#eee",
+                  m.sender === "user" ? "#4f46e5" : "#eee",
                 color: m.sender === "user" ? "#fff" : "#000",
                 maxWidth: "70%",
               }}
@@ -171,30 +175,34 @@ export default function Chat() {
           </div>
         ))}
 
-        {loading && <p>🤖 Mobi is thinking...</p>}
+        {loading && <p>{t("chat.processing")}</p>}
       </div>
 
       <div style={{ display: "flex", gap: 10, marginTop: 10 }}>
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Ask Mobi..."
+          placeholder={t("chat.placeholder")}
           style={{ flex: 1, padding: 10 }}
+          onKeyDown={(e) => e.key === "Enter" && sendMessage()}
         />
 
         <button onClick={sendMessage} disabled={loading}>
-          Send
+          {t("chat.send")}
         </button>
 
         <button
           onClick={recording ? stopRecording : startRecording}
           style={{
-            background: recording ? "red" : "green",
+            background: recording ? "#dc2626" : "#059669",
             color: "#fff",
-            padding: "10px",
+            padding: "10px 14px",
+            borderRadius: 8,
+            border: "none",
+            cursor: "pointer",
           }}
         >
-          {recording ? "Stop 🎙️" : "Speak 🎤"}
+          {recording ? t("chat.listening") : t("chat.voice")}
         </button>
       </div>
     </div>

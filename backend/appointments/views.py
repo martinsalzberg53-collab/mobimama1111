@@ -6,6 +6,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Appointment
 from .serializers import AppointmentSerializer
+from sms.utils import send_appointment_confirmation, send_appointment_approved, send_appointment_cancelled
 
 
 class AppointmentViewSet(viewsets.ModelViewSet):
@@ -42,7 +43,11 @@ class AppointmentViewSet(viewsets.ModelViewSet):
 
         if role == 'MOTHER':
             if hasattr(user, 'motherprofile'):
-                serializer.save(mother=user.motherprofile)
+                appt = serializer.save(mother=user.motherprofile)
+                phone = user.motherprofile.phone_number
+                if phone:
+                    clinic_name = str(appt.clinic_name) if appt.clinic_name else "your clinic"
+                    send_appointment_confirmation(phone, clinic_name, str(appt.date_time))
             else:
                 raise serializers.ValidationError('You must have a mother profile to create an appointment.')
         elif role == 'NURSE':
@@ -67,6 +72,10 @@ class AppointmentViewSet(viewsets.ModelViewSet):
         if appointment.mother:
             appointment.mother.assigned_nurse = user
             appointment.mother.save(update_fields=['assigned_nurse'])
+            phone = appointment.mother.phone_number
+            if phone:
+                clinic_name = str(appointment.clinic_name) if appointment.clinic_name else "your clinic"
+                send_appointment_approved(phone, clinic_name)
         appointment.save()
         serializer = self.get_serializer(appointment)
         return Response(serializer.data)
@@ -80,5 +89,9 @@ class AppointmentViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Only nurses can reject appointments.'}, status=status.HTTP_403_FORBIDDEN)
         appointment.status = 'cancelled'
         appointment.save()
+        if appointment.mother:
+            phone = appointment.mother.phone_number
+            if phone:
+                send_appointment_cancelled(phone)
         serializer = self.get_serializer(appointment)
         return Response(serializer.data)

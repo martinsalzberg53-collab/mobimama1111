@@ -81,3 +81,18 @@
 .cta-button.active-link {
   border-bottom: none; /* No underline for buttons */
 }
+
+.language-switcher {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: 0.82rem;
+  background: #f8fafc;
+  color: #334155;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.language-switcher:focus {
+  outline: 2px solid #4f46e5;
+}
