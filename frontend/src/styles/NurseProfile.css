@@ -1,0 +1,151 @@
+.nurse-profile-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 1rem 2.5%;
+  font-family: Inter, system-ui, sans-serif;
+  color: #1f2937;
+}
+
+.nurse-profile-header h1 {
+  margin: 0 0 1.2rem;
+  color: #1f2937;
+}
+
+.nurse-profile-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.nurse-section-header {
+  font-size: 1.15rem;
+  color: #0056b3;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 0.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.8rem;
+}
+
+.nurse-section-header:first-of-type {
+  margin-top: 0;
+}
+
+.nurse-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+.nurse-label {
+  font-weight: 700;
+  color: #555;
+}
+
+.nurse-value {
+  color: #222;
+}
+
+.nurse-field input {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  max-width: 340px;
+}
+
+.nurse-save-button {
+  border: none;
+  background: #0056b3;
+  color: white;
+  border-radius: 10px;
+  padding: 10px 22px;
+  cursor: pointer;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.nurse-save-button:hover {
+  background: #004494;
+}
+
+.nurse-success {
+  color: #047857;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.nurse-error {
+  color: #b91c1c;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.nurse-empty-text {
+  color: #64748b;
+  font-size: 0.92rem;
+}
+
+.nurse-empty-text a {
+  color: #4f46e5;
+  font-weight: 600;
+}
+
+.nurse-patient-list {
+  display: grid;
+  gap: 14px;
+}
+
+.nurse-patient-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 16px;
+}
+
+.nurse-patient-name {
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 8px;
+}
+
+.nurse-patient-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  font-size: 0.9rem;
+  color: #475569;
+  align-items: center;
+}
+
+.nurse-risk-badge {
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+}
+
+.nurse-risk-badge.low {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.nurse-risk-badge.medium {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.nurse-risk-badge.high {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.nurse-patient-reasons {
+  margin-top: 8px;
+  color: #b91c1c;
+  font-weight: 600;
+  font-size: 0.88rem;
+}

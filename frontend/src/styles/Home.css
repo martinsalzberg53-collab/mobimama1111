@@ -1,0 +1,76 @@
+.home-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #ffffff;
+  color: #213547;
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  padding: 0 20px;
+  text-align: center;
+}
+
+/* Hero section */
+.home-hero {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 100px 20px 60px;
+}
+
+.home-hero h1 {
+  font-size: 3.5em;
+  margin-bottom: 20px;
+  color: #4caf50; /* green accent for AI */
+}
+
+.home-hero p {
+  font-size: 1.3em;
+  margin-bottom: 30px;
+  max-width: 500px;
+}
+
+.home-cta {
+  display: inline-block;
+  padding: 14px 32px;
+  background-color: #4caf50;
+  color: #ffffff;
+  font-weight: bold;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background-color 0.3s ease;
+}
+
+.home-cta:hover {
+  background-color: #45a049;
+}
+
+/* Feature cards */
+.home-features {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 20px;
+  padding-bottom: 80px;
+}
+
+.feature {
+  background-color: #f2f2f2;
+  padding: 20px;
+  border-radius: 8px;
+  flex: 1 1 250px;
+  max-width: 280px;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.feature h2 {
+  margin-bottom: 10px;
+  color: #4caf50;
+}
+
+.feature p {
+  color: #333;
+  font-size: 1em;
+  line-height: 1.4;
+}

@@ -1,0 +1,9 @@
+from django.apps import AppConfig
+
+
+class MothersConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'mothers'
+
+    def ready(self):
+        import mothers.signals

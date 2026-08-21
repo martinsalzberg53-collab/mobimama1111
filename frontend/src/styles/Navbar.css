@@ -1,0 +1,98 @@
+/* --- Main Navbar Container --- */
+.navbar-container {
+  display: flex;
+  justify-content: space-between; /* Pushes brand left, links right */
+  align-items: center;
+  padding: 1rem 2.5%; /* Matches the padding of your dashboard */
+  background-color: #ffffff;
+  border-bottom: 1px solid #e0e0e0;
+  font-family: Arial, sans-serif;
+}
+
+/* --- Brand/Logo --- */
+.navbar-brand a {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #0056b3; /* Main brand color */
+  text-decoration: none;
+}
+
+/* --- Links Container --- */
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem; /* This replaces all your inline margin-right styles */
+}
+
+/* --- Individual NavLinks --- */
+.nav-link {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  padding-bottom: 5px; /* Space for the active border */
+  border-bottom: 2px solid transparent; /* Placeholder for active state */
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  color: #0056b3;
+}
+
+/* --- Active Link Style --- */
+/* This style is applied by NavLink automatically */
+.nav-link.active-link {
+  color: #0056b3;
+  border-bottom-color: #0056b3; /* Adds an underline to the active page */
+}
+
+/* --- User Greeting --- */
+.navbar-greeting {
+  color: #555;
+  font-style: italic;
+}
+
+/* --- Buttons --- */
+.logout-button {
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background-color 0.2s;
+}
+
+.logout-button:hover {
+  background-color: #c9302c;
+}
+
+/* "Call to Action" button for Sign Up */
+.cta-button {
+  background-color: #007bff;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 5px;
+}
+.cta-button:hover {
+  background-color: #0056b3;
+  color: white;
+}
+.cta-button.active-link {
+  border-bottom: none; /* No underline for buttons */
+}
+
+.language-switcher {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: 0.82rem;
+  background: #f8fafc;
+  color: #334155;
+  cursor: pointer;
+  margin-left: 8px;
+}
+
+.language-switcher:focus {
+  outline: 2px solid #4f46e5;
+}

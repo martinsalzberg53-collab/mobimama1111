@@ -1,0 +1,97 @@
+/* Use the unique, non-conflicting container name */
+.mother-profile-container {
+  width: 100%;
+  max-width: 900px; /* You can adjust this max-width */
+  margin: 0 auto;
+  padding: 1rem 2.5%;
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+/* Header with Title */
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.profile-header h1 {
+  margin: 0;
+  color: #333;
+}
+
+/* The main content card */
+.profile-card {
+  background-color: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  padding: 2rem;
+}
+
+/* --- View Mode Styles --- */
+.profile-section-header {
+  font-size: 1.2rem;
+  color: #0056b3;
+  border-bottom: 2px solid #f0f0f0;
+  padding-bottom: 0.5rem;
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+}
+.profile-section-header:first-of-type {
+  margin-top: 0;
+}
+
+.profile-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 0.75rem;
+  font-size: 1rem;
+}
+
+.profile-field .label {
+  font-weight: bold;
+  color: #555;
+  width: 180px; /* Aligns the values */
+}
+
+.profile-field .value {
+  color: #222;
+}
+
+.profile-field input,
+.profile-field select {
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  max-width: 340px;
+}
+
+.profile-save-button {
+  border: none;
+  background: #0056b3;
+  color: white;
+  border-radius: 10px;
+  padding: 10px 22px;
+  cursor: pointer;
+  font-weight: 700;
+  margin-top: 6px;
+}
+
+.profile-save-button:hover {
+  background: #004494;
+}
+
+.profile-success {
+  color: #047857;
+  font-weight: 600;
+  margin-top: 10px;
+}
+
+.profile-error {
+  color: #b91c1c;
+  font-weight: 600;
+  margin-top: 10px;
+}
