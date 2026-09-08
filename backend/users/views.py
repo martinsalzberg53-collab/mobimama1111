@@ -1,4 +1,5 @@
 from rest_framework import generics, permissions, status
+import sys
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.authtoken.views import ObtainAuthToken
@@ -20,23 +21,30 @@ class RegisterView(generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
+        try:
+            user = serializer.save()
 
-        if user.role == 'NURSE':
-            user.generate_otp()
-            send_otp_email(user.email, user.otp_code, user.first_name)
+            if user.role == 'NURSE':
+                user.generate_otp()
+                send_otp_email(user.email, user.otp_code, user.first_name)
+                return Response({
+                    "message": "Registration successful. Please check your email for a 6-digit verification code.",
+                    "email": user.email,
+                    "requires_verification": True,
+                }, status=status.HTTP_201_CREATED)
+
+            token, created = Token.objects.get_or_create(user=user)
             return Response({
-                "message": "Registration successful. Please check your email for a 6-digit verification code.",
-                "email": user.email,
-                "requires_verification": True,
+                "user": UserSerializer(user, context=self.get_serializer_context()).data,
+                "token": token.key,
+                "requires_verification": False,
             }, status=status.HTTP_201_CREATED)
-
-        token, created = Token.objects.get_or_create(user=user)
-        return Response({
-            "user": UserSerializer(user, context=self.get_serializer_context()).data,
-            "token": token.key,
-            "requires_verification": False,
-        }, status=status.HTTP_201_CREATED)
+        except Exception:
+            import traceback
+            return Response({
+                "debug_error": str(sys.exc_info()[1]),
+                "debug_traceback": traceback.format_exc(),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class VerifyOTPView(APIView):
@@ -109,12 +117,18 @@ class ResendOTPView(APIView):
                 status=status.HTTP_200_OK
             )
 
-        user.generate_otp()
-        send_otp_email(user.email, user.otp_code, user.first_name)
-
-        return Response({
-            "message": "A new verification code has been sent to your email.",
-        }, status=status.HTTP_200_OK)
+        try:
+            user.generate_otp()
+            send_otp_email(user.email, user.otp_code, user.first_name)
+            return Response({
+                "message": "A new verification code has been sent to your email.",
+            }, status=status.HTTP_200_OK)
+        except Exception:
+            import traceback
+            return Response({
+                "debug_error": str(sys.exc_info()[1]),
+                "debug_traceback": traceback.format_exc(),
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class CustomLoginView(ObtainAuthToken):
