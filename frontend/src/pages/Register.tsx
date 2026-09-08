@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useUser } from "../context/UserContext";
 import API from "../api/axios";
 import "../styles/Register.css";
 
 const Register = () => {
   const navigate = useNavigate();
+  const { logout } = useUser();
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -32,7 +34,10 @@ const Register = () => {
       });
 
       setSuccess("Registration successful!");
-      setTimeout(() => navigate("/login"), 2000);
+      setTimeout(() => {
+        logout();
+        navigate("/login");
+      }, 2000);
     } catch (err: any) {
       console.error(err);
 

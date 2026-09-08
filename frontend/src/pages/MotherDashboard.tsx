@@ -15,6 +15,15 @@ const MotherDashboard = () => {
     navigate("/login"); // Redirect to login after logout
   };
 
+  if (!user || user.role !== "MOTHER") {
+    return (
+      <div className="mother-dashboard-container">
+        <h1>Access denied</h1>
+        <p>This page is only available to mothers.</p>
+      </div>
+    );
+  }
+
   return (
     // 4. Use the non-conflicting CSS class name
     <div className="mother-dashboard-container">
