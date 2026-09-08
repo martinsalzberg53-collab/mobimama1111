@@ -22,7 +22,7 @@ services:
       - key: AT_SENDER_ID
         value: MobiMama
       - key: GMAIL_ADDRESS
-        value: mobimama@gmail.com
+        value: mobimamagh@gmail.com
       - key: GMAIL_APP_PASSWORD
         sync: false
       - key: ADMIN_EMAIL

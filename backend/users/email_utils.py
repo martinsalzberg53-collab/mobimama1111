@@ -4,7 +4,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
 
-GMAIL_ADDRESS = os.environ.get('GMAIL_ADDRESS', 'mobimama@gmail.com')
+GMAIL_ADDRESS = os.environ.get('GMAIL_ADDRESS', 'mobimamagh@gmail.com')
 GMAIL_APP_PASSWORD = os.environ.get('GMAIL_APP_PASSWORD', '')
 
 
