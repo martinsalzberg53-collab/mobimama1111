@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
+import re
 from .models import User
 
 
@@ -9,7 +10,7 @@ class LoginSerializer(serializers.Serializer):
     """
     email = serializers.EmailField()
     password = serializers.CharField(
-        style={'input_type': 'password'}, 
+        style={'input_type': 'password'},
         trim_whitespace=False
     )
 
@@ -18,13 +19,15 @@ class LoginSerializer(serializers.Serializer):
         password = data.get('password')
 
         if email and password:
-            # We use Django's authenticate function
             user = authenticate(request=self.context.get('request'),
                                 email=email, password=password)
 
-            # If authentication fails
             if not user:
                 msg = 'Unable to log in with provided credentials.'
+                raise serializers.ValidationError(msg, code='authorization')
+
+            if user.role == 'NURSE' and not user.email_verified:
+                msg = 'Please verify your email before logging in. Check your inbox for the verification code.'
                 raise serializers.ValidationError(msg, code='authorization')
         else:
             msg = 'Must include "email" and "password".'
@@ -38,38 +41,42 @@ class LoginSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for the User model, used for retrieving user details.
-    This is a "read-only" serializer.
     """
     class Meta:
         model = User
-        # These are the fields that will be sent to the frontend.
-        # Notice the password is NOT here.
         fields = (
-            'id', 
-            'email', 
-            'first_name', 
-            'last_name', 
-            'role', 
-            'clinic'
+            'id',
+            'email',
+            'first_name',
+            'last_name',
+            'role',
+            'clinic',
+            'nmc_pin',
+            'phone_number',
+            'email_verified',
         )
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     """
     Serializer for creating a new user.
-    This is a "write-only" serializer.
+    Nurses must provide NMC PIN, phone, hospital, and a student email.
     """
-    # We add 'password2' to check for a password confirmation
     password2 = serializers.CharField(write_only=True, required=True, label="Confirm password")
+    hospital = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = User
         fields = (
-            'email', 
-            'first_name', 
-            'last_name', 
-            'password', 
-            'password2', 
-            'role'
+            'email',
+            'first_name',
+            'last_name',
+            'password',
+            'password2',
+            'role',
+            'nmc_pin',
+            'phone_number',
+            'hospital',
         )
         extra_kwargs = {
             'password': {'write_only': True, 'required': True, 'min_length': 8},
@@ -77,31 +84,82 @@ class RegisterSerializer(serializers.ModelSerializer):
             'last_name': {'required': True},
         }
 
+    def validate_email(self, value):
+        email = value.lower().strip()
+        if User.objects.filter(email=email).exists():
+            raise serializers.ValidationError("An account with this email already exists.")
+        return email
+
+    def validate_nmc_pin(self, value):
+        if not value or not value.strip():
+            return value
+        pin = value.strip().upper()
+        pattern = r'^[A-Z0-9]{4,20}$'
+        if not re.match(pattern, pin):
+            raise serializers.ValidationError(
+                "Invalid NMC PIN format. Use 4-20 alphanumeric characters (e.g., NMC12345 or NMC-12345)."
+            )
+        return pin
+
+    def validate_phone_number(self, value):
+        if not value or not value.strip():
+            return value
+        phone = value.strip().replace(' ', '').replace('-', '')
+        if not re.match(r'^0[235]\d{8}$', phone):
+            raise serializers.ValidationError(
+                "Invalid Ghana phone number. Use format: 0XX XXX XXXX (e.g., 0240000000)."
+            )
+        return phone
+
     def validate(self, data):
-        """
-        Check that the two passwords match and the role is valid.
-        """
         if data['password'] != data['password2']:
             raise serializers.ValidationError({"password": "Passwords do not match."})
-        
-        # Security check: only allow 'MOTHER' or 'NURSE' to be created
-        # via the public API. 'ADMIN' can only be created via 'createsuperuser'.
+
         if data['role'] not in ['MOTHER', 'NURSE']:
             raise serializers.ValidationError({"role": "Invalid role. Must be MOTHER or NURSE."})
-            
+
+        if data['role'] == 'NURSE':
+            email = data.get('email', '').lower().strip()
+            user_model = User()
+            if not user_model.is_student_email(email):
+                raise serializers.ValidationError({
+                    "email": "Nurses must register with an official student/school email address (e.g., name@school.edu.gh)."
+                })
+
+            if not data.get('nmc_pin') or not data['nmc_pin'].strip():
+                raise serializers.ValidationError({
+                    "nmc_pin": "NMC PIN is required for nurse registration."
+                })
+
+            if not data.get('phone_number') or not data['phone_number'].strip():
+                raise serializers.ValidationError({
+                    "phone_number": "Phone number is required for nurse registration."
+                })
+
+            if not data.get('hospital') or not data['hospital'].strip():
+                raise serializers.ValidationError({
+                    "hospital": "Please select your current hospital."
+                })
+
         return data
 
     def create(self, validated_data):
-        """
-        Create and return a new user, properly hashing the password.
-        """
-        # We use our custom 'create_user' manager method
-        # which handles password hashing.
+        hospital = validated_data.pop('hospital', None)
+        nmc_pin = validated_data.pop('nmc_pin', None)
+        phone_number = validated_data.pop('phone_number', None)
+
+        email_verified = True if validated_data['role'] == 'MOTHER' else False
+
         user = User.objects.create_user(
             email=validated_data['email'],
             password=validated_data['password'],
             first_name=validated_data['first_name'],
             last_name=validated_data['last_name'],
-            role=validated_data['role']
+            role=validated_data['role'],
+            email_verified=email_verified,
+            nmc_pin=nmc_pin,
+            phone_number=phone_number,
+            clinic=hospital,
         )
+
         return user

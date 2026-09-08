@@ -21,6 +21,10 @@ services:
         value: your-africastalking-api-key-here
       - key: AT_SENDER_ID
         value: MobiMama
+      - key: GMAIL_ADDRESS
+        value: mobimama@gmail.com
+      - key: GMAIL_APP_PASSWORD
+        sync: false
 
 databases:
   - name: mobi-mama-db

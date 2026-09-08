@@ -6,6 +6,7 @@ import OfflineBanner from "./components/OfflineBanner";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+import VerifyOTP from "./pages/VerifyOTP";
 
 import MotherDashboard from "./pages/MotherDashboard";
 import MotherProfile from "./pages/MotherProfile";
@@ -26,6 +27,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/verify-otp" element={<VerifyOTP />} />
 
         <Route path="/MotherDashboard" element={<MotherDashboard />} />
         <Route path="/motherprofile" element={<MotherProfile />} />

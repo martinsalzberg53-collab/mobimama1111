@@ -1,13 +1,10 @@
 from django.urls import path
-from .views import RegisterView, CustomLoginView, UserProfileView
+from .views import RegisterView, CustomLoginView, UserProfileView, VerifyOTPView, ResendOTPView
 
 urlpatterns = [
-    # e.g., POST /api/users/register/
     path('register/', RegisterView.as_view(), name='auth-register'),
-    
-    # e.g., POST /api/users/login/
     path('login/', CustomLoginView.as_view(), name='auth-login'),
-    
-    # e.g., GET /api/users/profile/
     path('profile/', UserProfileView.as_view(), name='auth-profile'),
+    path('verify-otp/', VerifyOTPView.as_view(), name='auth-verify-otp'),
+    path('resend-otp/', ResendOTPView.as_view(), name='auth-resend-otp'),
 ]

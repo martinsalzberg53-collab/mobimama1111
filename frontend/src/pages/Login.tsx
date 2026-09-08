@@ -43,7 +43,20 @@ const Login = () => {
     } catch (err: any) {
       console.error(err);
       if (err.response && err.response.status === 400) {
-        setError("Invalid email or password. Please try again.");
+        const data = err.response.data;
+        if (data && typeof data === "object" && data.non_field_errors) {
+          setError(
+            Array.isArray(data.non_field_errors)
+              ? data.non_field_errors[0]
+              : String(data.non_field_errors)
+          );
+        } else if (data && typeof data === "object" && data.detail) {
+          setError(String(data.detail));
+        } else if (data && typeof data === "object" && data.error) {
+          setError(String(data.error));
+        } else {
+          setError("Invalid email or password. Please try again.");
+        }
       } else {
         setError("A server error occurred. Please try again later.");
       }
