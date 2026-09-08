@@ -84,10 +84,22 @@ def send_otp_email(to_email, otp_code, first_name):
     msg.attach(html_part)
 
     try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=10) as server:
             server.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
             server.sendmail(GMAIL_ADDRESS, to_email, msg.as_string())
+        print(f"[EMAIL SENT] OTP to {to_email}")
         return True
     except Exception as e:
-        print(f"[EMAIL ERROR] Failed to send OTP to {to_email}: {e}")
-        return False
+        print(f"[EMAIL WARN] 465 failed ({e}); trying 587 STARTTLS...")
+        try:
+            with smtplib.SMTP('smtp.gmail.com', 587, timeout=10) as server:
+                server.ehlo()
+                server.starttls()
+                server.ehlo()
+                server.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
+                server.sendmail(GMAIL_ADDRESS, to_email, msg.as_string())
+            print(f"[EMAIL SENT] OTP to {to_email} via 587")
+            return True
+        except Exception as e2:
+            print(f"[EMAIL ERROR] Failed to send OTP to {to_email}: {e2}")
+            return False
