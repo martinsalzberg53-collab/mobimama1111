@@ -90,6 +90,15 @@ API.interceptors.response.use(
   },
   (error) => {
     const config = error.config;
+    if (config && error.response && error.response.status === 401) {
+      const hadToken = config.headers && config.headers.Authorization;
+      const url: string = config.url || "";
+      if (hadToken && !url.includes("/login")) {
+        localStorage.removeItem("token");
+        delete config.headers.Authorization;
+        return API(config);
+      }
+    }
     if (!navigator.onLine && config && config.method !== "get") {
       queueWrite(config);
       return Promise.resolve({ data: { offline: true, queued: true } });
