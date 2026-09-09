@@ -13,6 +13,11 @@ BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '')
 BREVO_SENDER_EMAIL = os.environ.get('BREVO_SENDER_EMAIL', GMAIL_ADDRESS)
 BREVO_SENDER_NAME = os.environ.get('BREVO_SENDER_NAME', 'Mobi Mama')
 
+EMAILJS_PUBLIC_KEY = os.environ.get('EMAILJS_PUBLIC_KEY', '')
+EMAILJS_PRIVATE_KEY = os.environ.get('EMAILJS_PRIVATE_KEY', '')
+EMAILJS_SERVICE_ID = os.environ.get('EMAILJS_SERVICE_ID', '')
+EMAILJS_TEMPLATE_ID = os.environ.get('EMAILJS_TEMPLATE_ID', '')
+
 
 def _html_body(first_name, otp_code):
     return f"""
@@ -77,6 +82,36 @@ def _text_body(first_name, otp_code):
     return (f"Hi {first_name},\n\nThank you for registering as a nurse on Mobi Mama. "
             f"Your verification code is: {otp_code}. It expires in 7 minutes.\n\n"
             "If you did not request this, please ignore this email.")
+
+
+def _send_via_emailjs(to_email, first_name, otp_code):
+    """EmailJS REST API — sends FROM the connected Gmail (mobimamagh) via HTTPS."""
+    payload = {
+        "service_id": EMAILJS_SERVICE_ID,
+        "template_id": EMAILJS_TEMPLATE_ID,
+        "user_id": EMAILJS_PUBLIC_KEY,
+        "template_params": {
+            "to_email": to_email,
+            "first_name": first_name or "there",
+            "otp_code": otp_code,
+        },
+    }
+    if EMAILJS_PRIVATE_KEY:
+        payload["accessToken"] = EMAILJS_PRIVATE_KEY
+    req = urllib.request.Request(
+        "https://api.emailjs.com/api/v1.0/email/send",
+        data=json.dumps(payload).encode('utf-8'),
+        method="POST",
+        headers={
+            "Content-Type": "application/json",
+            "X-Requested-With": "XMLHttpRequest",
+            "Origin": "https://mobi-mama.onrender.com",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=20) as resp:
+        body = resp.read().decode('utf-8', 'replace')
+        print(f"[EMAIL SENT] EmailJS OTP to {to_email}: HTTP {resp.status} {body[:200]}")
+        return True
 
 
 def _send_via_resend(to_email, first_name, otp_code):
@@ -166,7 +201,13 @@ def _send_via_gmail_smtp(to_email, otp_code):
 
 
 def send_otp_email(to_email, otp_code, first_name):
-    """Send OTP verification email: Brevo HTTP API, then Resend, then Gmail SMTP fallback."""
+    """Send OTP: EmailJS (from user's Gmail) -> Brevo -> Resend -> Gmail SMTP -> logs."""
+    if EMAILJS_PUBLIC_KEY and EMAILJS_SERVICE_ID and EMAILJS_TEMPLATE_ID:
+        try:
+            return _send_via_emailjs(to_email, first_name, otp_code)
+        except Exception as e:
+            print(f"[EMAIL WARN] EmailJS failed for {to_email}: {e}")
+
     if BREVO_API_KEY:
         try:
             return _send_via_brevo(to_email, first_name, otp_code)
@@ -182,5 +223,5 @@ def send_otp_email(to_email, otp_code, first_name):
     if GMAIL_APP_PASSWORD:
         return _send_via_gmail_smtp(to_email, otp_code)
 
-    print(f"[EMAIL SKIPPED] No BREVO_API_KEY / RESEND_API_KEY / GMAIL_APP_PASSWORD set. OTP for {to_email}: {otp_code}")
+    print(f"[EMAIL SKIPPED] No email provider configured. OTP for {to_email}: {otp_code}")
     return True
