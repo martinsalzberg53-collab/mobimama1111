@@ -25,6 +25,10 @@ services:
         value: mobimamagh@gmail.com
       - key: GMAIL_APP_PASSWORD
         sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM
+        value: "Mobi Mama <onboarding@resend.dev>"
       - key: ADMIN_EMAIL
         sync: false
       - key: ADMIN_PASSWORD
