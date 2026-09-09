@@ -123,7 +123,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             user_model = User()
             if not user_model.is_student_email(email):
                 raise serializers.ValidationError({
-                    "email": "Nurses must register with an official student/school email address (e.g., name@school.edu.gh)."
+                    "email": "Nurses must register with an official university email address (e.g., name@knust.edu.gh). Personal email addresses are not accepted."
                 })
 
             if not data.get('nmc_pin') or not data['nmc_pin'].strip():

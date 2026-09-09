@@ -120,7 +120,7 @@ const Register = () => {
         />
 
         <input
-          placeholder={role === "NURSE" ? "Official Student Email (e.g., name@school.edu.gh)" : "Email"}
+          placeholder={role === "NURSE" ? "University Email (e.g., name@knust.edu.gh)" : "Email"}
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -129,7 +129,7 @@ const Register = () => {
 
         {role === "NURSE" && (
           <p className="field-hint">
-            Must be an official student/school email address (.edu.gh, .edu, .school)
+            Must be an official university email (e.g., name@knust.edu.gh). Personal emails not accepted.
           </p>
         )}
 

@@ -46,21 +46,6 @@ class User(AbstractUser):
         ('ADMIN', 'Admin'),
     )
 
-    STUDENT_EMAIL_DOMAINS = [
-        '.edu.gh',
-        '.edu',
-        '.school.gh',
-        '.nurse.gh',
-        '.health.gh',
-        '.training.gh',
-        '.nsti.edu.gh',
-        '.knust.edu.gh',
-        '.ug.edu.gh',
-        '.ugcs.edu.gh',
-        '.uog.edu.gh',
-        '.knuST.edu.gh',
-    ]
-
     username = None
     email = models.EmailField(unique=True)
 
@@ -104,16 +89,21 @@ class User(AbstractUser):
         return True, "Email verified successfully."
 
     def is_student_email(self, email):
-        email_lower = email.lower()
-        for domain in self.STUDENT_EMAIL_DOMAINS:
-            if email_lower.endswith(domain):
-                return True
-        parts = email_lower.split('@')
-        if len(parts) == 2:
-            domain_part = parts[1]
-            if '.edu' in domain_part or '.school' in domain_part or '.training' in domain_part:
-                return True
-        return False
+        """Only accept official university emails (domain is edu/ac).
+
+        Accepts: name@knust.edu.gh, name@st.ug.edu.gh, name@uci.edu, name@ucl.ac.uk
+        Rejects: name@gmail.com, name@yahoo.com, name@educator.com, etc.
+        """
+        email_lower = (email or '').lower().strip()
+        if '@' not in email_lower:
+            return False
+        domain = email_lower.split('@')[-1].strip()
+        labels = [label for label in domain.split('.') if label]
+        if len(labels) < 2:
+            return False
+        tld = labels[-1]
+        sld = labels[-2]
+        return tld == 'edu' or sld in ('edu', 'ac')
 
     def __str__(self):
         return f"{self.email} ({self.role})"
