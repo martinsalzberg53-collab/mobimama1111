@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import authenticate
+import os
 import re
 from .models import User
 
@@ -42,6 +43,9 @@ class UserSerializer(serializers.ModelSerializer):
     """
     Serializer for the User model, used for retrieving user details.
     """
+    license_status = serializers.SerializerMethodField()
+    license_review_note = serializers.SerializerMethodField()
+
     class Meta:
         model = User
         fields = (
@@ -54,16 +58,36 @@ class UserSerializer(serializers.ModelSerializer):
             'nmc_pin',
             'phone_number',
             'email_verified',
+            'license_status',
+            'license_review_note',
         )
+
+    def get_license_status(self, obj):
+        if obj.role != 'NURSE':
+            return None
+        try:
+            return obj.nurse_profile.license_status
+        except Exception:
+            return 'PENDING'
+
+    def get_license_review_note(self, obj):
+        if obj.role != 'NURSE':
+            return None
+        try:
+            return obj.nurse_profile.license_review_note or None
+        except Exception:
+            return None
 
 
 class RegisterSerializer(serializers.ModelSerializer):
     """
     Serializer for creating a new user.
-    Nurses must provide NMC PIN, phone, hospital, and a student email.
+    Nurses must provide NMC PIN/AIN, phone, hospital, license upload, and a student email.
     """
     password2 = serializers.CharField(write_only=True, required=True, label="Confirm password")
     hospital = serializers.CharField(required=False, allow_blank=True)
+    registration_type = serializers.ChoiceField(choices=['PIN', 'AIN'], required=False, default='PIN')
+    license_file = serializers.FileField(required=False, allow_null=True)
 
     class Meta:
         model = User
@@ -77,6 +101,8 @@ class RegisterSerializer(serializers.ModelSerializer):
             'nmc_pin',
             'phone_number',
             'hospital',
+            'registration_type',
+            'license_file',
         )
         extra_kwargs = {
             'password': {'write_only': True, 'required': True, 'min_length': 8},
@@ -94,7 +120,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         if not value or not value.strip():
             return value
         pin = value.strip().upper()
-        pattern = r'^[A-Z0-9]{4,20}$'
+        pattern = r'^[A-Z0-9][A-Z0-9-]{3,19}$'
         if not re.match(pattern, pin):
             raise serializers.ValidationError(
                 "Invalid NMC PIN format. Use 4-20 alphanumeric characters (e.g., NMC12345 or NMC-12345)."
@@ -110,6 +136,19 @@ class RegisterSerializer(serializers.ModelSerializer):
                 "Invalid Ghana phone number. Use format: 0XX XXX XXXX (e.g., 0240000000)."
             )
         return phone
+
+    def validate_license_file(self, value):
+        if value is None:
+            return value
+        name = (value.name or '').lower()
+        ext = name.rsplit('.', 1)[-1]
+        if ext not in ('jpg', 'jpeg', 'png', 'webp', 'heic', 'pdf'):
+            raise serializers.ValidationError(
+                "License must be a clear photo (JPG, PNG, WEBP, HEIC) or a PDF."
+            )
+        if value.size > 10 * 1024 * 1024:
+            raise serializers.ValidationError("License file must be smaller than 10MB.")
+        return value
 
     def validate(self, data):
         if data['password'] != data['password2']:
@@ -141,12 +180,19 @@ class RegisterSerializer(serializers.ModelSerializer):
                     "hospital": "Please select your current hospital."
                 })
 
+            if data.get('role') == 'NURSE' and not data.get('license_file'):
+                raise serializers.ValidationError({
+                    "license_file": "Upload a photo or PDF of your current NMC license."
+                })
+
         return data
 
     def create(self, validated_data):
         hospital = validated_data.pop('hospital', None)
         nmc_pin = validated_data.pop('nmc_pin', None)
         phone_number = validated_data.pop('phone_number', None)
+        registration_type = validated_data.pop('registration_type', 'PIN')
+        license_file = validated_data.pop('license_file', None)
 
         email_verified = True if validated_data['role'] == 'MOTHER' else False
 
@@ -161,5 +207,14 @@ class RegisterSerializer(serializers.ModelSerializer):
             phone_number=phone_number,
             clinic=hospital,
         )
+
+        if user.role == 'NURSE':
+            from clinics.models import NurseProfile
+            profile, _ = NurseProfile.objects.get_or_create(user=user)
+            profile.registration_type = registration_type
+            if license_file:
+                profile.license_file = license_file
+                profile.license_status = 'PENDING'
+            profile.save()
 
         return user

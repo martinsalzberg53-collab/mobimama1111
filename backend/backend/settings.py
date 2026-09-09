@@ -146,6 +146,10 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Serve the built React app from here (frontend/dist) via WhiteNoise
 WHITENOISE_ROOT = BASE_DIR.parent / 'frontend' / 'dist'
 
+# Uploaded media (licenses etc.) — served via /api/users/license-files/ for staff/owners
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 

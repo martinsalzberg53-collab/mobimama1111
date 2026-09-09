@@ -23,6 +23,8 @@ const Register = () => {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [hospital, setHospital] = useState("");
   const [clinics, setClinics] = useState<Clinic[]>([]);
+  const [registrationType, setRegistrationType] = useState<"PIN" | "AIN">("PIN");
+  const [licenseFile, setLicenseFile] = useState<File | null>(null);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -61,9 +63,29 @@ const Register = () => {
         payload.nmc_pin = nmcPin;
         payload.phone_number = phoneNumber;
         payload.hospital = hospital;
+        payload.registration_type = registrationType;
       }
 
-      const res = await API.post("/users/register/", payload);
+      let res;
+      if (role === "NURSE" && licenseFile) {
+        const fd = new FormData();
+        fd.append("first_name", firstName);
+        fd.append("last_name", lastName);
+        fd.append("email", email);
+        fd.append("password", password);
+        fd.append("password2", password2);
+        fd.append("role", role);
+        fd.append("nmc_pin", nmcPin);
+        fd.append("phone_number", phoneNumber);
+        fd.append("hospital", hospital);
+        fd.append("registration_type", registrationType);
+        fd.append("license_file", licenseFile);
+        res = await API.post("/users/register/", fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+      } else {
+        res = await API.post("/users/register/", payload);
+      }
 
       if (res.data.requires_verification) {
         setSuccess("Registration successful! Check your email for a verification code.");
@@ -164,13 +186,25 @@ const Register = () => {
 
         {role === "NURSE" && (
           <>
+            <select
+              value={registrationType}
+              onChange={(e) => setRegistrationType(e.target.value as "PIN" | "AIN")}
+            >
+              <option value="PIN">NMC PIN (Nurse)</option>
+              <option value="AIN">AIN (Midwife)</option>
+            </select>
+
             <input
-              placeholder="NMC PIN (e.g., NMC12345)"
+              placeholder={registrationType === "PIN" ? "NMC PIN (e.g., NMC12345)" : "AIN (e.g., M23-4567)"}
               value={nmcPin}
               onChange={(e) => setNmcPin(e.target.value)}
               required
             />
-            <p className="field-hint">Nursing and Midwifery Council PIN</p>
+            <p className="field-hint">
+              {registrationType === "PIN"
+                ? "Nursing and Midwifery Council PIN for nurses"
+                : "Ayush/Allied? No - Ghana NMC AIN for midwives (Auxiliary/Accredited Identification Number)"}
+            </p>
 
             <input
               placeholder="Phone Number (e.g., 0240000000)"
@@ -194,6 +228,21 @@ const Register = () => {
               ))}
             </select>
             <p className="field-hint">The hospital where you currently work</p>
+
+            <input
+              id="license-upload"
+              type="file"
+              accept="image/*,.pdf"
+              onChange={(e) => {
+                setLicenseFile(e.target.files?.[0] || null);
+                setError("");
+              }}
+              required={role === "NURSE"}
+            />
+            <p className="field-hint">
+              Upload a clear photo or PDF of your current NMC license for verification.
+            </p>
+            {licenseFile && <p className="file-name">Selected: {licenseFile.name}</p>}
           </>
         )}
 
