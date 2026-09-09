@@ -36,13 +36,13 @@ services:
       - key: BREVO_SENDER_NAME
         value: "Mobi Mama"
       - key: EMAILJS_PUBLIC_KEY
-        sync: false
+        value: Qy2kiWNUnMlnNACMS
       - key: EMAILJS_PRIVATE_KEY
-        sync: false
+        value: vLFOxfgSRp_HIOKaF-Ixb
       - key: EMAILJS_SERVICE_ID
-        sync: false
+        value: service_imq6d4o
       - key: EMAILJS_TEMPLATE_ID
-        sync: false
+        value: template_qad3awv
       - key: ADMIN_EMAIL
         sync: false
       - key: ADMIN_PASSWORD
