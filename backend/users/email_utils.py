@@ -92,6 +92,7 @@ def _send_via_emailjs(to_email, first_name, otp_code):
         "user_id": EMAILJS_PUBLIC_KEY,
         "template_params": {
             "to_email": to_email,
+            "email": to_email,
             "first_name": first_name or "there",
             "otp_code": otp_code,
         },
