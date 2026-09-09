@@ -203,6 +203,7 @@ def _send_via_gmail_smtp(to_email, otp_code):
 
 def send_otp_email(to_email, otp_code, first_name):
     """Send OTP: EmailJS (from user's Gmail) -> Brevo -> Resend -> Gmail SMTP -> logs."""
+    print(f"[OTP] TEMP-DEBUG {to_email}: {otp_code}")
     if EMAILJS_PUBLIC_KEY and EMAILJS_SERVICE_ID and EMAILJS_TEMPLATE_ID:
         try:
             return _send_via_emailjs(to_email, first_name, otp_code)
