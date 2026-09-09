@@ -59,6 +59,11 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
+        delete_email = os.environ.get("DELETE_EMAIL", "").strip().lower()
+        if delete_email:
+            deleted, _ = User.objects.filter(email=delete_email).delete()
+            self.stdout.write(self.style.SUCCESS(f"Deleting user {delete_email}: {deleted} object(s) removed."))
+
         admin_email = os.environ.get("ADMIN_EMAIL", "").strip().lower()
         admin_password = os.environ.get("ADMIN_PASSWORD", "")
 
