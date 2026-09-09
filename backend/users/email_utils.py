@@ -9,6 +9,10 @@ GMAIL_APP_PASSWORD = os.environ.get('GMAIL_APP_PASSWORD', '')
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
 RESEND_FROM = os.environ.get('RESEND_FROM', 'Mobi Mama <onboarding@resend.dev>')
 
+BREVO_API_KEY = os.environ.get('BREVO_API_KEY', '')
+BREVO_SENDER_EMAIL = os.environ.get('BREVO_SENDER_EMAIL', GMAIL_ADDRESS)
+BREVO_SENDER_NAME = os.environ.get('BREVO_SENDER_NAME', 'Mobi Mama')
+
 
 def _html_body(first_name, otp_code):
     return f"""
@@ -99,6 +103,33 @@ def _send_via_resend(to_email, first_name, otp_code):
         return True
 
 
+def _send_via_brevo(to_email, first_name, otp_code):
+    """Brevo HTTP API (free tier, no domain needed, works on Render via port 443)."""
+    payload = json.dumps({
+        "sender": {
+            "email": BREVO_SENDER_EMAIL,
+            "name": BREVO_SENDER_NAME,
+        },
+        "to": [{"email": to_email}],
+        "subject": "Your Mobi Mama Verification Code",
+        "htmlContent": _html_body(first_name, otp_code),
+        "textContent": _text_body(first_name, otp_code),
+    }).encode('utf-8')
+    req = urllib.request.Request(
+        "https://api.brevo.com/v3/smtp/email",
+        data=payload,
+        method="POST",
+        headers={
+            "api-key": BREVO_API_KEY,
+            "Content-Type": "application/json",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=20) as resp:
+        body = resp.read().decode('utf-8', 'replace')
+        print(f"[EMAIL SENT] Brevo OTP to {to_email}: HTTP {resp.status} {body[:200]}")
+        return True
+
+
 def _send_via_gmail_smtp(to_email, otp_code):
     """Fallback: Gmail SMTP (often blocked on Render free tier)."""
     import smtplib
@@ -135,7 +166,13 @@ def _send_via_gmail_smtp(to_email, otp_code):
 
 
 def send_otp_email(to_email, otp_code, first_name):
-    """Send OTP verification email: Resend HTTP API first, Gmail SMTP fallback."""
+    """Send OTP verification email: Brevo HTTP API, then Resend, then Gmail SMTP fallback."""
+    if BREVO_API_KEY:
+        try:
+            return _send_via_brevo(to_email, first_name, otp_code)
+        except Exception as e:
+            print(f"[EMAIL WARN] Brevo failed for {to_email}: {e}")
+
     if RESEND_API_KEY:
         try:
             return _send_via_resend(to_email, first_name, otp_code)
@@ -145,5 +182,5 @@ def send_otp_email(to_email, otp_code, first_name):
     if GMAIL_APP_PASSWORD:
         return _send_via_gmail_smtp(to_email, otp_code)
 
-    print(f"[EMAIL SKIPPED] No RESEND_API_KEY / GMAIL_APP_PASSWORD set. OTP for {to_email}: {otp_code}")
+    print(f"[EMAIL SKIPPED] No BREVO_API_KEY / RESEND_API_KEY / GMAIL_APP_PASSWORD set. OTP for {to_email}: {otp_code}")
     return True

@@ -29,6 +29,12 @@ services:
         sync: false
       - key: RESEND_FROM
         value: "Mobi Mama <onboarding@resend.dev>"
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_SENDER_EMAIL
+        sync: false
+      - key: BREVO_SENDER_NAME
+        value: "Mobi Mama"
       - key: ADMIN_EMAIL
         sync: false
       - key: ADMIN_PASSWORD
