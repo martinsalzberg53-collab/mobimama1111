@@ -24,7 +24,6 @@ const Register = () => {
   const [hospital, setHospital] = useState("");
   const [clinics, setClinics] = useState<Clinic[]>([]);
   const [registrationType, setRegistrationType] = useState<"PIN" | "AIN">("PIN");
-  const [licenseFile, setLicenseFile] = useState<File | null>(null);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -66,26 +65,7 @@ const Register = () => {
         payload.registration_type = registrationType;
       }
 
-      let res;
-      if (role === "NURSE" && licenseFile) {
-        const fd = new FormData();
-        fd.append("first_name", firstName);
-        fd.append("last_name", lastName);
-        fd.append("email", email);
-        fd.append("password", password);
-        fd.append("password2", password2);
-        fd.append("role", role);
-        fd.append("nmc_pin", nmcPin);
-        fd.append("phone_number", phoneNumber);
-        fd.append("hospital", hospital);
-        fd.append("registration_type", registrationType);
-        fd.append("license_file", licenseFile);
-        res = await API.post("/users/register/", fd, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-      } else {
-        res = await API.post("/users/register/", payload);
-      }
+      let res = await API.post("/users/register/", payload);
 
       if (res.data.requires_verification) {
         setSuccess("Registration successful! Check your email for a verification code.");
@@ -142,7 +122,7 @@ const Register = () => {
         />
 
         <input
-          placeholder={role === "NURSE" ? "University Email (e.g., name@knust.edu.gh)" : "Email"}
+          placeholder={role === "NURSE" ? "Hospital Work Email (e.g., name@<hospital>.gov.gh)" : "Email"}
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -151,7 +131,7 @@ const Register = () => {
 
         {role === "NURSE" && (
           <p className="field-hint">
-            Must be an official university email (e.g., name@knust.edu.gh). Personal emails not accepted.
+            Use the official work email issued to you by your hospital. A verification code will be sent to it.
           </p>
         )}
 
@@ -228,21 +208,6 @@ const Register = () => {
               ))}
             </select>
             <p className="field-hint">The hospital where you currently work</p>
-
-            <input
-              id="license-upload"
-              type="file"
-              accept="image/*,.pdf"
-              onChange={(e) => {
-                setLicenseFile(e.target.files?.[0] || null);
-                setError("");
-              }}
-              required={role === "NURSE"}
-            />
-            <p className="field-hint">
-              Upload a clear photo or PDF of your current NMC license for verification.
-            </p>
-            {licenseFile && <p className="file-name">Selected: {licenseFile.name}</p>}
           </>
         )}
 

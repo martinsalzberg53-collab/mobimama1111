@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import RegisterView, CustomLoginView, UserProfileView, VerifyOTPView, ResendOTPView, LicenseFileView
+from .views import RegisterView, CustomLoginView, UserProfileView, VerifyOTPView, ResendOTPView
 
 urlpatterns = [
     path('register/', RegisterView.as_view(), name='auth-register'),
@@ -7,5 +7,4 @@ urlpatterns = [
     path('profile/', UserProfileView.as_view(), name='auth-profile'),
     path('verify-otp/', VerifyOTPView.as_view(), name='auth-verify-otp'),
     path('resend-otp/', ResendOTPView.as_view(), name='auth-resend-otp'),
-    path('license-files/<path:filepath>/', LicenseFileView.as_view(), name='auth-license-file'),
 ]

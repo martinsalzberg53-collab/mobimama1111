@@ -230,29 +230,6 @@ const NurseDashboard = () => {
         </div>
       </header>
 
-      {user.license_status && user.license_status !== "APPROVED" && (
-        <div
-          style={{
-            padding: "12px 16px",
-            marginBottom: "16px",
-            borderRadius: "8px",
-            fontSize: "14px",
-            backgroundColor: user.license_status === "REJECTED" ? "#fdecea" : "#fff3cd",
-            color: user.license_status === "REJECTED" ? "#c62828" : "#795548",
-            border: `1px solid ${user.license_status === "REJECTED" ? "#e57373" : "#ffe082"}`,
-          }}
-        >
-          {user.license_status === "REJECTED"
-            ? "Your NMC license was rejected. Contact administration."
-            : "Your NMC license is pending review. Administrative approval is required for full access."}
-          {user.license_review_note && (
-            <span style={{ display: "block", marginTop: 4, opacity: 0.85 }}>
-              {user.license_review_note}
-            </span>
-          )}
-        </div>
-      )}
-
       <section className="alerts-panel">
         <h2>My Clinic</h2>
         {clinics.length ? (

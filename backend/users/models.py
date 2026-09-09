@@ -88,22 +88,5 @@ class User(AbstractUser):
         self.save(update_fields=['email_verified', 'otp_code', 'otp_expires_at'])
         return True, "Email verified successfully."
 
-    def is_student_email(self, email):
-        """Only accept official university emails (domain is edu/ac).
-
-        Accepts: name@knust.edu.gh, name@st.ug.edu.gh, name@uci.edu, name@ucl.ac.uk
-        Rejects: name@gmail.com, name@yahoo.com, name@educator.com, etc.
-        """
-        email_lower = (email or '').lower().strip()
-        if '@' not in email_lower:
-            return False
-        domain = email_lower.split('@')[-1].strip()
-        labels = [label for label in domain.split('.') if label]
-        if len(labels) < 2:
-            return False
-        tld = labels[-1]
-        sld = labels[-2]
-        return tld == 'edu' or sld in ('edu', 'ac')
-
     def __str__(self):
         return f"{self.email} ({self.role})"

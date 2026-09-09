@@ -8,8 +8,6 @@ type User = {
   last_name: string;
   role: 'MOTHER' | 'NURSE' | 'ADMIN'; // Uppercase
   clinic?: string | null;
-  license_status?: string | null;
-  license_review_note?: string | null;
 };
 
 // 2. Define what the context provides
