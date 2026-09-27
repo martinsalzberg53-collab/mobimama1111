@@ -16,6 +16,8 @@ from pathlib import Path
 import dj_database_url
 from dotenv import load_dotenv
 
+from django.core.exceptions import ImproperlyConfigured
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -108,6 +110,29 @@ DATABASES = {
         conn_max_age=600,
     )
 }
+
+# The SQLite fallback above is for local development only. Render containers
+# have an ephemeral filesystem, so a production deploy that quietly lands on
+# SQLite looks healthy right up until the next deploy or restart wipes every
+# user and appointment. Refuse to boot instead of losing data silently.
+#
+# Render sets RENDER=true in the container, so that plus DJANGO_DEBUG=false
+# covers both the current deployment and any non-Render production host.
+IS_PRODUCTION = os.environ.get('RENDER', '').lower() == 'true' or DEBUG is False
+
+if IS_PRODUCTION and DATABASES['default']['ENGINE'] == 'django.db.backends.sqlite3':
+    configured = os.environ.get('DATABASE_URL', '').strip()
+    if configured:
+        reason = 'DATABASE_URL points at SQLite ({})'.format(configured)
+    else:
+        reason = 'DATABASE_URL is not set'
+    raise ImproperlyConfigured(
+        'Refusing to start in production with a SQLite database: {}. '
+        'Set DATABASE_URL to a PostgreSQL connection string '
+        '(postgresql://user:password@host/dbname?sslmode=require). '
+        'SQLite is only supported when DJANGO_DEBUG is true and RENDER is unset.'
+        .format(reason)
+    )
 
 
 # Password validation
