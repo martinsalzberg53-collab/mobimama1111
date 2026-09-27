@@ -162,6 +162,35 @@
   color: #0f172a;
 }
 
+.appointment-nurse {
+  display: grid;
+  gap: 6px;
+  margin-top: 4px;
+  padding: 16px;
+  border-radius: 14px;
+  background: #ffffff;
+  border: 1px solid #bfdbfe;
+}
+
+.appointment-nurse .appointment-nurse-title {
+  font-weight: 700;
+  color: #1d4ed8;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+
+.appointment-nurse-note {
+  margin: 6px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #fffbeb;
+  border-left: 4px solid #f59e0b;
+  color: #78350f;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
 .appointments-empty,
 .alerts-empty {
   color: #475569;

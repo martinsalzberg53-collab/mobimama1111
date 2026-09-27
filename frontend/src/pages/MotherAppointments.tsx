@@ -16,6 +16,13 @@ type MotherProfile = {
   due_date: string | null;
 };
 
+type NurseDetails = {
+  name: string;
+  registration_type: string;
+  registration_number: string;
+  phone_number: string;
+};
+
 type Appointment = {
   id: number;
   clinic_name: number | null;
@@ -23,6 +30,7 @@ type Appointment = {
   reason: string;
   status: string;
   clinic_display: string;
+  nurse_details: NurseDetails | null;
 };
 
 const MotherAppointments = () => {
@@ -255,6 +263,35 @@ const MotherAppointments = () => {
                 </span>
                 <span className="appointment-status">Status: {appointment.status}</span>
                 <p className="appointment-reason">{appointment.reason}</p>
+                {appointment.nurse_details && (
+                  <div className="appointment-nurse">
+                    <span className="appointment-nurse-title">Your Nurse</span>
+                    <span>
+                      <strong>Name:</strong> {appointment.nurse_details.name}
+                    </span>
+                    <span>
+                      <strong>
+                        {appointment.nurse_details.registration_type === "AIN"
+                          ? "AIN"
+                          : "NMC PIN"}
+                        :
+                      </strong>{" "}
+                      {appointment.nurse_details.registration_number || "Not provided"}
+                    </span>
+                    <span>
+                      <strong>Phone:</strong>{" "}
+                      {appointment.nurse_details.phone_number || "Not provided"}
+                    </span>
+                    <p className="appointment-nurse-note">
+                      When you arrive at {appointment.clinic_display || "the hospital"}{" "}
+                      on your appointment date, please check this nurse&apos;s{" "}
+                      {appointment.nurse_details.registration_type === "AIN"
+                        ? "AIN"
+                        : "NMC PIN"}{" "}
+                      with the hospital records before you are attended to.
+                    </p>
+                  </div>
+                )}
               </li>
             ))}
           </ul>

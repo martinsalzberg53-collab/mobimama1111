@@ -1,6 +1,9 @@
 import json
+import logging
 import os
 import urllib.request
+
+logger = logging.getLogger(__name__)
 
 
 GMAIL_ADDRESS = os.environ.get('GMAIL_ADDRESS', 'mobimamagh@gmail.com')
@@ -17,6 +20,42 @@ EMAILJS_PUBLIC_KEY = os.environ.get('EMAILJS_PUBLIC_KEY', '')
 EMAILJS_PRIVATE_KEY = os.environ.get('EMAILJS_PRIVATE_KEY', '')
 EMAILJS_SERVICE_ID = os.environ.get('EMAILJS_SERVICE_ID', '')
 EMAILJS_TEMPLATE_ID = os.environ.get('EMAILJS_TEMPLATE_ID', '')
+
+# Set OTP_DEBUG_LOG=true to print OTPs to the console. Off in production.
+OTP_DEBUG_LOG = os.environ.get('OTP_DEBUG_LOG', '').lower() == 'true'
+
+
+class EmailDeliveryError(Exception):
+    """Raised when a provider accepts the request but reports a failure.
+
+    These APIs answer HTTP 200 with an error body, so a 2xx status alone does
+    not mean the mail was sent. Raising here lets send_otp_email fall through
+    to the next provider instead of reporting a false success.
+    """
+
+
+def _post_json(url, payload, headers, provider, to_email):
+    """POST JSON and raise if the provider reports an error in a 2xx response."""
+    req = urllib.request.Request(
+        url,
+        data=json.dumps(payload).encode('utf-8'),
+        method="POST",
+        headers=headers,
+    )
+    with urllib.request.urlopen(req, timeout=20) as resp:
+        raw = resp.read().decode('utf-8', 'replace')
+        try:
+            body = json.loads(raw)
+        except ValueError:
+            body = None
+
+    if isinstance(body, dict) and (body.get('status') == 'error' or body.get('error')):
+        detail = body.get('message') or body.get('error') or raw
+        logger.error(f"{provider} rejected OTP for {to_email}: {detail}")
+        raise EmailDeliveryError(f"{provider}: {detail}")
+
+    logger.info(f"{provider} accepted OTP for {to_email}: {raw[:200]}")
+    return True
 
 
 def _html_body(first_name, otp_code):
@@ -99,50 +138,44 @@ def _send_via_emailjs(to_email, first_name, otp_code):
     }
     if EMAILJS_PRIVATE_KEY:
         payload["accessToken"] = EMAILJS_PRIVATE_KEY
-    req = urllib.request.Request(
+    return _post_json(
         "https://api.emailjs.com/api/v1.0/email/send",
-        data=json.dumps(payload).encode('utf-8'),
-        method="POST",
-        headers={
+        payload,
+        {
             "Content-Type": "application/json",
             "X-Requested-With": "XMLHttpRequest",
             "Origin": "https://mobi-mama.onrender.com",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36",
         },
+        "EmailJS",
+        to_email,
     )
-    with urllib.request.urlopen(req, timeout=20) as resp:
-        body = resp.read().decode('utf-8', 'replace')
-        print(f"[EMAIL SENT] EmailJS OTP to {to_email}: HTTP {resp.status} {body[:200]}")
-        return True
 
 
 def _send_via_resend(to_email, first_name, otp_code):
     """Try Resend's HTTP API first (works on Render; uses port 443 only)."""
-    payload = json.dumps({
+    payload = {
         "from": RESEND_FROM,
         "to": [to_email],
         "subject": "Your Mobi Mama Verification Code",
         "html": _html_body(first_name, otp_code),
         "text": _text_body(first_name, otp_code),
-    }).encode('utf-8')
-    req = urllib.request.Request(
+    }
+    return _post_json(
         "https://api.resend.com/emails",
-        data=payload,
-        method="POST",
-        headers={
+        payload,
+        {
             "Authorization": f"Bearer {RESEND_API_KEY}",
             "Content-Type": "application/json",
         },
+        "Resend",
+        to_email,
     )
-    with urllib.request.urlopen(req, timeout=20) as resp:
-        body = resp.read().decode('utf-8', 'replace')
-        print(f"[EMAIL SENT] Resend OTP to {to_email}: HTTP {resp.status} {body[:200]}")
-        return True
 
 
 def _send_via_brevo(to_email, first_name, otp_code):
     """Brevo HTTP API (free tier, no domain needed, works on Render via port 443)."""
-    payload = json.dumps({
+    payload = {
         "sender": {
             "email": BREVO_SENDER_EMAIL,
             "name": BREVO_SENDER_NAME,
@@ -151,20 +184,17 @@ def _send_via_brevo(to_email, first_name, otp_code):
         "subject": "Your Mobi Mama Verification Code",
         "htmlContent": _html_body(first_name, otp_code),
         "textContent": _text_body(first_name, otp_code),
-    }).encode('utf-8')
-    req = urllib.request.Request(
+    }
+    return _post_json(
         "https://api.brevo.com/v3/smtp/email",
-        data=payload,
-        method="POST",
-        headers={
+        payload,
+        {
             "api-key": BREVO_API_KEY,
             "Content-Type": "application/json",
         },
+        "Brevo",
+        to_email,
     )
-    with urllib.request.urlopen(req, timeout=20) as resp:
-        body = resp.read().decode('utf-8', 'replace')
-        print(f"[EMAIL SENT] Brevo OTP to {to_email}: HTTP {resp.status} {body[:200]}")
-        return True
 
 
 def _send_via_gmail_smtp(to_email, otp_code):
@@ -184,10 +214,10 @@ def _send_via_gmail_smtp(to_email, otp_code):
         with smtplib.SMTP_SSL('smtp.gmail.com', 465, timeout=10) as server:
             server.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
             server.sendmail(GMAIL_ADDRESS, to_email, msg.as_string())
-        print(f"[EMAIL SENT] OTP to {to_email} via Gmail 465")
+        logger.info(f"Gmail 465 sent OTP to {to_email}")
         return True
     except Exception as e:
-        print(f"[EMAIL WARN] Gmail 465 failed ({e}); trying 587 STARTTLS...")
+        logger.warning(f"Gmail 465 failed for {to_email} ({e}); trying 587 STARTTLS")
         try:
             with smtplib.SMTP('smtp.gmail.com', 587, timeout=10) as server:
                 server.ehlo()
@@ -195,36 +225,45 @@ def _send_via_gmail_smtp(to_email, otp_code):
                 server.ehlo()
                 server.login(GMAIL_ADDRESS, GMAIL_APP_PASSWORD)
                 server.sendmail(GMAIL_ADDRESS, to_email, msg.as_string())
-            print(f"[EMAIL SENT] OTP to {to_email} via Gmail 587")
+            logger.info(f"Gmail 587 sent OTP to {to_email}")
             return True
         except Exception as e2:
-            print(f"[EMAIL ERROR] Gmail SMTP failed for {to_email}: {e2}")
+            logger.error(f"Gmail SMTP failed for {to_email}: {e2}")
             return False
 
 
 def send_otp_email(to_email, otp_code, first_name):
-    """Send OTP: EmailJS (from user's Gmail) -> Brevo -> Resend -> Gmail SMTP -> logs."""
-    print(f"[OTP] TEMP-DEBUG {to_email}: {otp_code}")
+    """Send an OTP email, trying each configured provider in turn.
+
+    Returns True only if a provider actually accepted the message.
+    """
+    if OTP_DEBUG_LOG:
+        logger.warning(f"OTP for {to_email}: {otp_code}")
+
+    providers = []
     if EMAILJS_PUBLIC_KEY and EMAILJS_SERVICE_ID and EMAILJS_TEMPLATE_ID:
-        try:
-            return _send_via_emailjs(to_email, first_name, otp_code)
-        except Exception as e:
-            print(f"[EMAIL WARN] EmailJS failed for {to_email}: {e}")
-
+        providers.append(("EmailJS", lambda: _send_via_emailjs(to_email, first_name, otp_code)))
     if BREVO_API_KEY:
-        try:
-            return _send_via_brevo(to_email, first_name, otp_code)
-        except Exception as e:
-            print(f"[EMAIL WARN] Brevo failed for {to_email}: {e}")
-
+        providers.append(("Brevo", lambda: _send_via_brevo(to_email, first_name, otp_code)))
     if RESEND_API_KEY:
-        try:
-            return _send_via_resend(to_email, first_name, otp_code)
-        except Exception as e:
-            print(f"[EMAIL WARN] Resend failed for {to_email}: {e}")
-
+        providers.append(("Resend", lambda: _send_via_resend(to_email, first_name, otp_code)))
     if GMAIL_APP_PASSWORD:
-        return _send_via_gmail_smtp(to_email, otp_code)
+        providers.append(("Gmail SMTP", lambda: _send_via_gmail_smtp(to_email, otp_code)))
 
-    print(f"[EMAIL SKIPPED] No email provider configured. OTP for {to_email}: {otp_code}")
-    return True
+    if not providers:
+        logger.error(
+            f"No email provider configured, cannot deliver OTP for {to_email}. "
+            "Set EMAILJS_* or GMAIL_APP_PASSWORD."
+        )
+        return False
+
+    for name, send in providers:
+        try:
+            if send():
+                return True
+            logger.warning(f"{name} did not confirm delivery for {to_email}")
+        except Exception as e:
+            logger.warning(f"{name} failed for {to_email}: {e}")
+
+    logger.error(f"All email providers failed for {to_email}")
+    return False

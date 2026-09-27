@@ -17,6 +17,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
     )
     mother_name = serializers.SerializerMethodField()
     nurse_name = serializers.SerializerMethodField()
+    nurse_details = serializers.SerializerMethodField()
     clinic_display = serializers.SerializerMethodField()
     mother_summary = serializers.SerializerMethodField()
 
@@ -37,6 +38,26 @@ class AppointmentSerializer(serializers.ModelSerializer):
     def get_clinic_display(self, obj):
         return obj.clinic_name.name if obj.clinic_name else ''
 
+    def get_nurse_details(self, obj):
+        """Credentials the mother can check on arrival at the hospital.
+
+        Only exposed once a nurse has approved the appointment. A nurse
+        booking on a mother's behalf fills in ``nurse`` while the status is
+        still ``pending``, so the status check is what actually gates this.
+        """
+        nurse = obj.nurse
+        if not nurse or obj.status != 'approved':
+            return None
+        profile = getattr(nurse, 'nurse_profile', None)
+        return {
+            'name': self.get_nurse_name(obj),
+            # 'PIN' for nurses, 'AIN' for midwives. The number itself is
+            # nmc_pin either way, so the type only decides how we label it.
+            'registration_type': profile.registration_type if profile else 'PIN',
+            'registration_number': nurse.nmc_pin or '',
+            'phone_number': nurse.phone_number or '',
+        }
+
     def get_mother_summary(self, obj):
         m = obj.mother
         if not m:
@@ -52,7 +73,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Appointment
-        fields = ['id', 'mother', 'nurse', 'clinic_name', 'date_time', 'reason', 'status', 'created_at', 'updated_at', 'mother_name', 'nurse_name', 'clinic_display', 'mother_summary']
+        fields = ['id', 'mother', 'nurse', 'clinic_name', 'date_time', 'reason', 'status', 'created_at', 'updated_at', 'mother_name', 'nurse_name', 'nurse_details', 'clinic_display', 'mother_summary']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
     def create(self, validated_data):
