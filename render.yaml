@@ -20,7 +20,7 @@ services:
       - key: AT_SENDER_ID
         value: MobiMama
       - key: GMAIL_ADDRESS
-        value: mobimamagh@gmail.com
+        sync: false
       - key: GMAIL_APP_PASSWORD
         sync: false
       - key: RESEND_API_KEY
@@ -34,13 +34,13 @@ services:
       - key: BREVO_SENDER_NAME
         value: "Mobi Mama"
       - key: EMAILJS_PUBLIC_KEY
-        value: Qy2kiWNUnMlnNACMS
+        sync: false
       - key: EMAILJS_PRIVATE_KEY
         sync: false
       - key: EMAILJS_SERVICE_ID
-        value: service_imq6d4o
+        sync: false
       - key: EMAILJS_TEMPLATE_ID
-        value: template_qad3awv
+        sync: false
       - key: ADMIN_EMAIL
         sync: false
       - key: ADMIN_PASSWORD

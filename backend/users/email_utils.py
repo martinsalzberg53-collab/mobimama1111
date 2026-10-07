@@ -6,7 +6,9 @@ import urllib.request
 logger = logging.getLogger(__name__)
 
 
-GMAIL_ADDRESS = os.environ.get('GMAIL_ADDRESS', 'mobimamagh@gmail.com')
+# No default: an unset GMAIL_ADDRESS must fail loudly rather than silently
+# sending verification mail from an address we no longer control.
+GMAIL_ADDRESS = os.environ.get('GMAIL_ADDRESS', '')
 GMAIL_APP_PASSWORD = os.environ.get('GMAIL_APP_PASSWORD', '')
 
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
@@ -124,7 +126,11 @@ def _text_body(first_name, otp_code):
 
 
 def _send_via_emailjs(to_email, first_name, otp_code):
-    """EmailJS REST API — sends FROM the connected Gmail (mobimamagh) via HTTPS."""
+    """EmailJS REST API — sends FROM whatever Gmail is connected to the service.
+
+    The From address is configured in the EmailJS dashboard, NOT by any
+    EMAILJS_* env var; the payload below carries no From field.
+    """
     payload = {
         "service_id": EMAILJS_SERVICE_ID,
         "template_id": EMAILJS_TEMPLATE_ID,
@@ -134,6 +140,9 @@ def _send_via_emailjs(to_email, first_name, otp_code):
             "email": to_email,
             "first_name": first_name or "there",
             "otp_code": otp_code,
+            # EmailJS's own sample template calls the field {{passcode}};
+            # send both so a template using either name still shows the code.
+            "passcode": otp_code,
         },
     }
     if EMAILJS_PRIVATE_KEY:
