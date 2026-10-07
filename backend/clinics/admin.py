@@ -4,8 +4,8 @@ from .models import AllowedHospitalDomain, Clinic, NurseAssignment, NurseProfile
 
 @admin.register(Clinic)
 class ClinicAdmin(admin.ModelAdmin):
-    list_display = ('name', 'address', 'phone_number')
-    search_fields = ('name', 'address', 'phone_number')
+    list_display = ('name', 'address', 'phone_number', 'email_domain')
+    search_fields = ('name', 'address', 'phone_number', 'email_domain')
 
 @admin.register(NurseProfile)
 class NurseProfileAdmin(admin.ModelAdmin):

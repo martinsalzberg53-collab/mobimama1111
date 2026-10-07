@@ -7,6 +7,7 @@ import "../styles/Register.css";
 type Clinic = {
   id: number;
   name: string;
+  email_domain?: string;
 };
 
 const Register = () => {
@@ -122,7 +123,7 @@ const Register = () => {
         />
 
         <input
-          placeholder={role === "NURSE" ? "Hospital Work Email (e.g., name@<hospital>.gov.gh)" : "Email"}
+          placeholder={role === "NURSE" ? "Hospital Work Email (e.g., name@ghs.gov.gh)" : "Email"}
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
@@ -131,7 +132,7 @@ const Register = () => {
 
         {role === "NURSE" && (
           <p className="field-hint">
-            Use the official work email issued to you by your hospital. A verification code will be sent to it.
+            Use the official work email issued to you by your hospital. A verification code will be sent to it, so the domain must match the hospital you pick below.
           </p>
         )}
 
@@ -203,11 +204,15 @@ const Register = () => {
               <option value="">Select your hospital</option>
               {clinics.map((clinic) => (
                 <option key={clinic.id} value={clinic.name}>
-                  {clinic.name}
+                  {clinic.email_domain
+                    ? `${clinic.name} — ${clinic.email_domain}`
+                    : clinic.name}
                 </option>
               ))}
             </select>
-            <p className="field-hint">The hospital where you currently work</p>
+            <p className="field-hint">
+              One of {clinics.length || "300+"} hospitals across Ghana. Your work email must end with the domain shown next to your hospital.
+            </p>
           </>
         )}
 

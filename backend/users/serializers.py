@@ -132,7 +132,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             domain = email.rsplit('@', 1)[-1].lower() if '@' in email else ''
             if domain not in allowed:
                 raise serializers.ValidationError({
-                    "email": "Please register with the official hospital work email issued to you by your hospital (your hospital mail ends with a recognised hospital domain, e.g., name@<hospital>.gov.gh). This is not a recognised hospital mail domain."
+                    "email": "Please register with the official hospital work email issued to you by your hospital (e.g., name@ghs.gov.gh). This is not a recognised hospital mail domain."
                 })
 
             if not data.get('nmc_pin') or not data['nmc_pin'].strip():

@@ -6,7 +6,7 @@ from users.models import User
 class ClinicSerializer(serializers.ModelSerializer):
     class Meta:
         model = Clinic
-        fields = ['id', 'name', 'address', 'phone_number']
+        fields = ['id', 'name', 'address', 'phone_number', 'email_domain']
         read_only_fields = ['id']
     
     def validate_name(self, value):
