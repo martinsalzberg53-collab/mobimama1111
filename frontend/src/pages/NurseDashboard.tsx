@@ -198,14 +198,7 @@ const NurseDashboard = () => {
   };
 
   const getBadgeClass = (risk: MotherProfile["risk_level"]) => {
-    switch (risk) {
-      case "High":
-        return "risk-badge high";
-      case "Medium":
-        return "risk-badge medium";
-      default:
-        return "risk-badge low";
-    }
+    return `badge ${risk.toLowerCase()}`;
   };
 
   if (!user || user.role !== "NURSE") {
@@ -217,181 +210,378 @@ const NurseDashboard = () => {
     );
   }
 
+  const activeClinic = clinics.find((clinic) => clinic.id === selectedClinic);
+
   return (
-    <div className="nurse-dashboard-container">
-      <header className="dashboard-header">
+    <div className="nurse-dashboard-container aurora-bg">
+      <header className="nurse-hero">
         <div>
-          <h1>Welcome, {user.first_name}</h1>
-          <p>Your assigned patients and clinical alerts are shown below.</p>
-        </div>
-        <div className="notification-summary">
-          <span className="notification-count">{highRiskMothers.length}</span>
-          <p>High-risk mothers require attention</p>
+          <span className="eyebrow">Clinical overview</span>
+          <h1>
+            Welcome, <span className="gradient-text">{user.first_name}</span>
+          </h1>
+          <p className="nurse-hero-sub">
+            Your assigned patients, pending requests and clinical alerts are
+            all below.
+          </p>
         </div>
       </header>
 
-      <section className="alerts-panel">
-        <h2>My Clinic</h2>
-        {clinics.length ? (
+      <section className="nurse-stats">
+        <div className="stat-tile">
+          <span className="stat-icon">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M16 19v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+              <circle cx="9" cy="7" r="3.2" />
+              <path d="M22 19v-2a4 4 0 0 0-3-3.85" />
+            </svg>
+          </span>
+          <span className="stat-body">
+            <span className="stat-value">{mothers.length}</span>
+            <span className="stat-label">Assigned patients</span>
+          </span>
+        </div>
+
+        <div className="stat-tile">
+          <span className="stat-icon tone-danger">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M10.3 3.6 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0Z" />
+              <path d="M12 9v4M12 17h.01" />
+            </svg>
+          </span>
+          <span className="stat-body">
+            <span className="stat-value">{highRiskMothers.length}</span>
+            <span className="stat-label">High-risk alerts</span>
+          </span>
+        </div>
+
+        <div className="stat-tile">
+          <span className="stat-icon tone-warn">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <rect x="3" y="4.5" width="18" height="17" rx="2.5" />
+              <path d="M3 9.5h18M8 2.5v4M16 2.5v4" />
+            </svg>
+          </span>
+          <span className="stat-body">
+            <span className="stat-value">{pendingAppointments.length}</span>
+            <span className="stat-label">Awaiting approval</span>
+          </span>
+        </div>
+
+        <div className="stat-tile">
+          <span className="stat-icon tone-teal">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M3 21h18M5 21V9l7-5.5L19 9v12" />
+              <path d="M9.5 21v-5h5v5" />
+            </svg>
+          </span>
+          <span className="stat-body">
+            <span className="stat-value">{clinics.length}</span>
+            <span className="stat-label">Hospitals in network</span>
+          </span>
+        </div>
+      </section>
+
+      {/* Previously the load error was stored but never rendered, so a failed
+          fetch looked identical to "no patients assigned". */}
+      {error && <p className="notice notice-error nurse-load-error">{error}</p>}
+
+      <section className="nurse-panel panel">
+        <div className="nurse-panel-head">
+          <div>
+            <span className="eyebrow">Workplace</span>
+            <h2>My Clinic</h2>
+          </div>
+          {activeClinic && <span className="badge approved">{activeClinic.name}</span>}
+        </div>
+
+        {activeClinic ? (
+          <div className="clinic-picker">
+            <p className="nurse-hero-sub">
+              You are registered at{" "}
+              <strong>{activeClinic.name}</strong>.
+            </p>
+            <p className="notice notice-success">
+              Your hospital was set at registration and cannot be changed here.
+            </p>
+          </div>
+        ) : clinics.length ? (
           <>
-            <label htmlFor="my-clinic">Select the clinic where you work</label>
-            <select
-              id="my-clinic"
-              value={selectedClinic ?? ""}
-              onChange={(e) => setSelectedClinic(Number(e.target.value))}
-            >
-              <option value="" disabled>
-                Choose a clinic
-              </option>
-              {clinics.map((clinic) => (
-                <option key={clinic.id} value={clinic.id}>
-                  {clinic.name}
+            <div className="clinic-picker">
+              <label htmlFor="my-clinic">
+                Select the clinic where you work
+              </label>
+              <select
+                id="my-clinic"
+                className="field"
+                value={selectedClinic ?? ""}
+                onChange={(e) => setSelectedClinic(Number(e.target.value))}
+              >
+                <option value="" disabled>
+                  Choose a clinic
                 </option>
-              ))}
-            </select>
-            <button onClick={saveAssignment} className="save-assignment-button">
-              Save Clinic
-            </button>
-            {assignmentMsg && <p className="assignment-success">{assignmentMsg}</p>}
-            {assignmentError && <p className="assignment-error">{assignmentError}</p>}
+                {clinics.map((clinic) => (
+                  <option key={clinic.id} value={clinic.id}>
+                    {clinic.name}
+                  </option>
+                ))}
+              </select>
+              <button onClick={saveAssignment} className="btn btn-primary">
+                Save Clinic
+              </button>
+            </div>
+            {assignmentMsg && <p className="notice notice-success">{assignmentMsg}</p>}
+            {assignmentError && <p className="notice notice-error">{assignmentError}</p>}
           </>
         ) : (
-          <p className="alerts-empty">No clinics are available yet.</p>
+          <p className="notice notice-empty">No clinics are available yet.</p>
         )}
       </section>
 
-      <section className="alerts-panel">
-        <h2>Pending Appointments</h2>
-        <p className="alerts-hint">Approving an appointment assigns that mother to you (one patient, one nurse).</p>
-        {apptMsg && <p className="assignment-success">{apptMsg}</p>}
-        {apptError && <p className="assignment-error">{apptError}</p>}
-        {pendingAppointments.length ? (
-          pendingAppointments.map((appt) => (
-            <div key={appt.id} className="appointment-card">
-              <div className="appointment-card-body">
-                <p className="appointment-mother">{appt.mother_name || "Unknown mother"}</p>
-                {appt.mother_summary && (
-                  <div className="appointment-mother-info">
-                    <span className={getBadgeClass(appt.mother_summary.risk_level)}>
-                      {appt.mother_summary.risk_level}
-                    </span>
-                    {appt.mother_summary.risk_reasons.length > 0 && (
-                      <p className="mother-risk-reasons">
-                        {appt.mother_summary.risk_reasons.join("; ")}
-                      </p>
-                    )}
-                    <p><strong>Due:</strong> {appt.mother_summary.due_date || "Unknown"}</p>
-                    <p><strong>Phone:</strong> {appt.mother_summary.phone_number || "Unknown"}</p>
-                    {(() => {
-                      const symptoms: string[] = appt.mother_summary.indicators.symptoms || [];
-                      const fetal = appt.mother_summary.indicators.fetal_movement;
-                      return (
-                        <>
-                          {symptoms.length > 0 && (
-                            <p><strong>Symptoms:</strong> {symptoms.join(", ").replace(/_/g, " ")}</p>
-                          )}
-                          {fetal && <p><strong>Fetal movement:</strong> {fetal}</p>}
-                        </>
-                      );
-                    })()}
-                  </div>
-                )}
-                <p><strong>Clinic:</strong> {appt.clinic_display || "Unassigned"}</p>
-                <p><strong>When:</strong> {formatDateTime(appt.date_time)}</p>
-                {appt.reason && <p><strong>Reason:</strong> {appt.reason}</p>}
-              </div>
-              <div className="appointment-actions">
-                <button
-                  onClick={() => handleApprove(appt.id)}
-                  disabled={busyApptId === appt.id}
-                  className="approve-button"
-                >
-                  {busyApptId === appt.id ? "Saving..." : "Approve"}
-                </button>
-                <button
-                  onClick={() => handleReject(appt.id)}
-                  disabled={busyApptId === appt.id}
-                  className="reject-button"
-                >
-                  {busyApptId === appt.id ? "Saving..." : "Reject"}
-                </button>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p className="alerts-empty">No pending appointments for your clinic.</p>
-        )}
-      </section>
-
-      <section className="alerts-panel">
-        <h2>Automated Safety Alerts</h2>
-        {highRiskMothers.length ? (
-          highRiskMothers.map((mother) => (
-            <div key={mother.id} className="alert-card">
-              <div className="alert-title">
-                <strong>{mother.user.first_name} {mother.user.last_name}</strong>
-                <span className="alert-risk">{mother.risk_level}</span>
-              </div>
-              <p>{mother.clinic_name || "Unassigned clinic"}</p>
-              <ul>
-                {mother.risk_reasons.map((reason, index) => (
-                  <li key={index}>{reason}</li>
-                ))}
-              </ul>
-            </div>
-          ))
-        ) : (
-          <p className="alerts-empty">No active high-risk alerts right now.</p>
-        )}
-      </section>
-
-      <section className="mother-grid-section">
-        <h2>Assigned Patients</h2>
-        {mothers.length ? (
-          <div className="mother-grid">
-            {mothers.map((mother) => (
-              <div key={mother.id} className="mother-card">
-                <div className="mother-card-header">
-                  <h3>{mother.user.first_name} {mother.user.last_name}</h3>
-                  <span className={getBadgeClass(mother.risk_level)}>{mother.risk_level}</span>
-                </div>
-                <p><strong>Clinic:</strong> {mother.clinic_name || "Not assigned"}</p>
-                <p><strong>Due:</strong> {mother.due_date || "Unknown"}</p>
-                <p><strong>Phone:</strong> {mother.phone_number || "Unknown"}</p>
-                <p className="health-info-label">Latest indicators:</p>
-                <div className="health-info-grid">
-                  {Object.entries(mother.health_info || {}).map(([key, value]) => (
-                    <div key={key} className="health-info-item">
-                      <span className="health-info-key">{key.replace(/_/g, " ")}</span>
-                      <strong>{String(value)}</strong>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            ))}
+      <section className="nurse-panel panel">
+        <div className="nurse-panel-head">
+          <div>
+            <span className="eyebrow">Requests</span>
+            <h2>Pending Appointments</h2>
           </div>
+          {pendingAppointments.length > 0 && (
+            <span className="badge pending">
+              {pendingAppointments.length} waiting
+            </span>
+          )}
+        </div>
+        <p className="nurse-hint">
+          Approving an appointment assigns that mother to you (one patient, one
+          nurse).
+        </p>
+        {apptMsg && <p className="notice notice-success">{apptMsg}</p>}
+        {apptError && <p className="notice notice-error">{apptError}</p>}
+
+        {pendingAppointments.length ? (
+          pendingAppointments.map((appt) => {
+            const risk = appt.mother_summary?.risk_level;
+            const symptoms: string[] = appt.mother_summary?.indicators?.symptoms || [];
+            const fetal = appt.mother_summary?.indicators?.fetal_movement;
+
+            return (
+              <article
+                key={appt.id}
+                className={`appt-card${risk ? ` risk-${risk}` : ""}`}
+              >
+                <div className="appt-card-main">
+                  <div className="appt-card-title">
+                    <h3 className="appt-mother-name">
+                      {appt.mother_name || "Unknown mother"}
+                    </h3>
+                    {risk && <span className={getBadgeClass(risk)}>{risk}</span>}
+                  </div>
+
+                  <dl className="appt-facts">
+                    <div className="appt-fact">
+                      <dt>Clinic</dt>
+                      <dd>{appt.clinic_display || "Unassigned"}</dd>
+                    </div>
+                    <div className="appt-fact">
+                      <dt>When</dt>
+                      <dd>{formatDateTime(appt.date_time)}</dd>
+                    </div>
+                    {appt.mother_summary?.due_date && (
+                      <div className="appt-fact">
+                        <dt>Due date</dt>
+                        <dd>{appt.mother_summary.due_date}</dd>
+                      </div>
+                    )}
+                    {appt.mother_summary?.phone_number && (
+                      <div className="appt-fact">
+                        <dt>Phone</dt>
+                        <dd>{appt.mother_summary.phone_number}</dd>
+                      </div>
+                    )}
+                    {fetal && (
+                      <div className="appt-fact">
+                        <dt>Fetal movement</dt>
+                        <dd>{fetal}</dd>
+                      </div>
+                    )}
+                    {appt.reason && (
+                      <div className="appt-fact">
+                        <dt>Reason</dt>
+                        <dd>{appt.reason}</dd>
+                      </div>
+                    )}
+                  </dl>
+
+                  {symptoms.length > 0 && (
+                    <ul className="appt-reasons">
+                      {symptoms.map((symptom, index) => (
+                        <li key={index}>{symptom.replace(/_/g, " ")}</li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {appt.mother_summary && appt.mother_summary.risk_reasons.length > 0 && (
+                    <ul className="appt-reasons">
+                      {appt.mother_summary.risk_reasons.map((reason, index) => (
+                        <li key={index}>{reason}</li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
+                <div className="appt-actions">
+                  <button
+                    onClick={() => handleApprove(appt.id)}
+                    disabled={busyApptId === appt.id}
+                    className="btn btn-ok"
+                  >
+                    {busyApptId === appt.id ? "Saving..." : "Approve"}
+                  </button>
+                  <button
+                    onClick={() => handleReject(appt.id)}
+                    disabled={busyApptId === appt.id}
+                    className="btn btn-danger"
+                  >
+                    {busyApptId === appt.id ? "Saving..." : "Reject"}
+                  </button>
+                </div>
+              </article>
+            );
+          })
         ) : (
-          <p className="alerts-empty">
-            No patients assigned to you yet. Approve a pending appointment to take on a patient.
+          <p className="notice notice-empty">
+            No pending appointments for your clinic.
           </p>
         )}
       </section>
 
-      <section className="hospital-list-section">
-        <h2>Hospital Network</h2>
-        <div className="hospital-list">
-          {clinics.length ? (
-            clinics.map((clinic) => (
-              <div key={clinic.id} className="hospital-card">
-                <h3>{clinic.name}</h3>
-                <p>{clinic.address}</p>
-                <p>{clinic.phone_number}</p>
-              </div>
-            ))
-          ) : (
-            <p className="alerts-empty">No hospitals available yet.</p>
+      <section className="nurse-panel panel">
+        <div className="nurse-panel-head">
+          <div>
+            <span className="eyebrow">Monitoring</span>
+            <h2>Automated Safety Alerts</h2>
+          </div>
+          {highRiskMothers.length > 0 && (
+            <span className="badge high">{highRiskMothers.length} flagged</span>
           )}
         </div>
+
+        {highRiskMothers.length ? (
+          highRiskMothers.map((mother) => (
+            <article key={mother.id} className="alert-card">
+              <div className="alert-title">
+                <strong>
+                  {mother.user.first_name} {mother.user.last_name}
+                </strong>
+                <span className={getBadgeClass(mother.risk_level)}>
+                  {mother.risk_level}
+                </span>
+              </div>
+              <p className="alert-clinic">
+                {mother.clinic_name || "Unassigned clinic"}
+              </p>
+              <ul className="alert-reasons">
+                {mother.risk_reasons.map((reason, index) => (
+                  <li key={index}>{reason}</li>
+                ))}
+              </ul>
+            </article>
+          ))
+        ) : (
+          <p className="notice notice-empty">
+            No active high-risk alerts right now.
+          </p>
+        )}
+      </section>
+
+      <section className="nurse-panel panel">
+        <div className="nurse-panel-head">
+          <div>
+            <span className="eyebrow">Caseload</span>
+            <h2>Assigned Patients</h2>
+          </div>
+          {mothers.length > 0 && <span className="badge neutral">{mothers.length} total</span>}
+        </div>
+
+        {mothers.length ? (
+          <div className="mother-grid">
+            {mothers.map((mother) => (
+              <article key={mother.id} className="mother-card">
+                <div className="mother-card-header">
+                  <h3>
+                    {mother.user.first_name} {mother.user.last_name}
+                  </h3>
+                  <span className={getBadgeClass(mother.risk_level)}>
+                    {mother.risk_level}
+                  </span>
+                </div>
+
+                <dl className="mother-card-facts">
+                  <div>
+                    <dt>Clinic</dt>
+                    <dd>{mother.clinic_name || "Not assigned"}</dd>
+                  </div>
+                  <div>
+                    <dt>Due</dt>
+                    <dd>{mother.due_date || "Unknown"}</dd>
+                  </div>
+                  <div>
+                    <dt>Phone</dt>
+                    <dd>{mother.phone_number || "Unknown"}</dd>
+                  </div>
+                </dl>
+
+                {Object.keys(mother.health_info || {}).length > 0 && (
+                  <>
+                    <p className="health-info-label">Latest indicators</p>
+                    <div className="health-info-grid">
+                      {Object.entries(mother.health_info || {}).map(
+                        ([key, value]) => (
+                          <div key={key} className="health-info-item">
+                            <span className="health-info-key">
+                              {key.replace(/_/g, " ")}
+                            </span>
+                            <strong>{String(value)}</strong>
+                          </div>
+                        )
+                      )}
+                    </div>
+                  </>
+                )}
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="notice notice-empty">
+            No patients assigned to you yet. Approve a pending appointment to
+            take on a patient.
+          </p>
+        )}
+      </section>
+
+      <section className="nurse-panel panel">
+        <div className="nurse-panel-head">
+          <div>
+            <span className="eyebrow">Directory</span>
+            <h2>Hospital Network</h2>
+          </div>
+          {clinics.length > 0 && <span className="badge neutral">{clinics.length} hospitals</span>}
+        </div>
+
+        {clinics.length ? (
+          <div className="hospital-grid">
+            {clinics.map((clinic) => (
+              <article key={clinic.id} className="hospital-card">
+                <h3>{clinic.name}</h3>
+                {clinic.address && <p>{clinic.address}</p>}
+                {clinic.phone_number && (
+                  <p className="hospital-phone">{clinic.phone_number}</p>
+                )}
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="notice notice-empty">No hospitals available yet.</p>
+        )}
       </section>
     </div>
   );

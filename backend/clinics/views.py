@@ -54,10 +54,13 @@ class NurseAssignmentViewSet(viewsets.ModelViewSet):
             return NurseAssignment.objects.all()
         return NurseAssignment.objects.filter(nurse=user)
 
+    def _is_admin(self):
+        return self._normalize_role(getattr(self.request.user, 'role', None)) == 'ADMIN'
+
     def perform_create(self, serializer):
         '''Nurses create their own assignment; admins can assign on behalf of others.'''
         user = self.request.user
-        if self._normalize_role(getattr(user, 'role', None)) != 'ADMIN':
+        if not self._is_admin():
             if NurseAssignment.objects.filter(nurse=user).exists():
                 raise serializers.ValidationError(
                     "You already have a clinic assigned. Update it instead of creating a new one."
@@ -65,3 +68,19 @@ class NurseAssignmentViewSet(viewsets.ModelViewSet):
             serializer.save(nurse=user)
         else:
             serializer.save()
+
+    def perform_update(self, serializer):
+        '''Only admins may reassign a nurse to a different hospital.'''
+        if not self._is_admin():
+            raise serializers.ValidationError(
+                "Your hospital was set at registration and cannot be changed. Contact an administrator."
+            )
+        serializer.save()
+
+    def perform_destroy(self, instance):
+        '''Only admins may remove a nurse's hospital assignment.'''
+        if not self._is_admin():
+            raise serializers.ValidationError(
+                "Your hospital was set at registration and cannot be changed. Contact an administrator."
+            )
+        instance.delete()
