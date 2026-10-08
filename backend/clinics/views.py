@@ -8,9 +8,15 @@ from .serializers import ClinicSerializer, NurseAssignmentSerializer
 
 
 class ClinicViewSet(viewsets.ModelViewSet):
-    """API endpoint that allows clinics to be viewed or edited."""
-    queryset = Clinic.objects.all()
+    """API endpoint that allows clinics to be viewed or edited.
+
+    The platform presents the 16 regional hospitals (one per region) to the
+    public; the full directory remains available to admin users.
+    """
     serializer_class = ClinicSerializer
+    
+    def get_queryset(self):
+        return Clinic.objects.filter(regional=True)
     
     def get_permissions(self):
 

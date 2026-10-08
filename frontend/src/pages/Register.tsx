@@ -211,7 +211,7 @@ const Register = () => {
               ))}
             </select>
             <p className="field-hint">
-              One of {clinics.length || "300+"} hospitals across Ghana. Your work email must end with the domain shown next to your hospital.
+              One of {clinics.length || 16} regional hospitals across Ghana. Your work email must end with the domain shown next to your hospital.
             </p>
           </>
         )}
