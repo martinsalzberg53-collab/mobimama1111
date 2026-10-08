@@ -63,7 +63,7 @@ const AITipsCard = () => {
   // --- Render Logic (This part was already perfect) ---
   const renderContent = () => {
     if (isLoading) {
-      return <p>Loading tip...</p>;
+      return <p className="loading-note">Loading tip...</p>;
     }
     if (error) {
       return <p className="tip-error">{error}</p>;

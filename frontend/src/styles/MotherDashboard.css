@@ -1,178 +1,356 @@
-/* --- Main Dashboard Layout --- */
-/* This name prevents conflicts with other dashboard styles */
+/* ==========================================================================
+   Mother dashboard
+   ========================================================================== */
+
 .mother-dashboard-container {
-  width: 100%;
-  max-width: none; /* Allows it to fill any screen size */
-  margin: 0; /* Removes all margins */
-  
-  /* Adds padding to keep content from touching screen edges */
-  padding: 2rem 2.5%; 
-  
-  font-family: Arial, sans-serif;
-  box-sizing: border-box; /* Makes padding behave correctly */
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 2rem 1.75rem 4rem;
+  color: var(--ink);
+  font-family: var(--font-body);
 }
 
-/* --- Header --- */
-.dashboard-header {
+.mother-dashboard-container h1,
+.mother-dashboard-container h2,
+.mother-dashboard-container h3 {
+  font-family: var(--font-display);
+  letter-spacing: -0.02em;
+}
+
+/* --- Hero ---------------------------------------------------------------- */
+.mother-hero {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
   margin-bottom: 2rem;
-  padding-bottom: 1.5rem;
-  border-bottom: 1px solid #eee;
+  padding: 1.75rem 1.9rem;
+  border-radius: var(--r-xl);
+  background: var(--glass-strong);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  position: relative;
+  overflow: hidden;
 }
 
-.header-greeting h1 {
+.mother-hero::before {
+  content: "";
+  position: absolute;
+  top: -60%;
+  right: -10%;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.3), transparent 65%);
+  pointer-events: none;
+}
+
+.mother-hero-copy {
+  position: relative;
+  min-width: 0;
+}
+
+.mother-hero .eyebrow {
+  display: block;
+  margin-bottom: 0.5rem;
+}
+
+.mother-hero h1 {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.9rem, 3.4vw, 2.6rem);
+  font-weight: 700;
+}
+
+.mother-hero p {
   margin: 0;
-  color: #333;
-}
-
-.header-greeting p {
-  margin: 0;
-  color: #555;
-  font-size: 1.1rem;
-}
-
-/* This is the style for the button you re-added */
-.logout-btn {
-  background-color: #d9534f;
-  color: white;
-  border: none;
-  padding: 10px 18px;
-  border-radius: 5px;
-  cursor: pointer;
+  color: var(--ink-soft);
   font-size: 1rem;
-  transition: background-color 0.2s;
+  max-width: 44ch;
 }
 
-.logout-btn:hover {
-  background-color: #c9302c;
+.mother-hero .logout-btn {
+  position: relative;
+  flex-shrink: 0;
 }
 
-/* --- Responsive Grid Layout --- */
-.dashboard-grid {
+/* --- Layout -------------------------------------------------------------- */
+.mother-dashboard-grid {
   display: grid;
-  /* This CSS creates a responsive grid. 
-    It fits columns that are at least 320px wide.
-    On large screens, this results in multiple columns.
-    On small screens, it results in a single column.
-  */
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1.5rem; /* Space between cards */
+  grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+  gap: 1.4rem;
+  align-items: start;
 }
 
-/* --- General Card Styling (for all imported cards) --- */
+/* Feature the appointment card at two columns on wide screens. */
+.mother-dashboard-grid > .dashboard-card:first-child {
+  grid-column: 1 / -1;
+}
+
+@media (min-width: 1180px) {
+  .mother-dashboard-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* --- Cards --------------------------------------------------------------- */
 .dashboard-card {
-  background-color: #ffffff;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
   display: flex;
   flex-direction: column;
+  gap: 0.9rem;
+  padding: 1.6rem;
+  border-radius: var(--r-lg);
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  transition: transform 0.22s var(--ease), box-shadow 0.22s var(--ease);
+}
+
+.dashboard-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
 }
 
 .dashboard-card h2 {
-  margin-top: 0;
-  border-bottom: 1px solid #f0f0f0;
-  padding-bottom: 0.75rem;
-  color: #444;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: var(--ink-strong);
 }
 
-/* --- Appointment Card --- */
-.appointment-card .appointment-details .appointment-date {
-  font-size: 1.2rem;
-  font-weight: bold;
-  color: #0056b3;
-  margin-bottom: 0.5rem;
-}
-.appointment-card .appointment-details .appointment-time {
-  font-size: 1.1rem;
-  color: #333;
-  margin-bottom: 0.5rem;
-}
-.appointment-card .appointment-details .appointment-location {
-  font-size: 1rem;
-  color: #555;
+.dashboard-card h2::before {
+  content: "";
+  width: 8px;
+  height: 20px;
+  border-radius: var(--r-pill);
+  background: var(--gradient-brand);
+  flex-shrink: 0;
 }
 
-/* --- AI Tips Card --- */
-.ai-tips-card {
-  flex-grow: 1;
-  justify-content: space-between;
+/* --- Appointment card ---------------------------------------------------- */
+.appointment-details {
+  display: grid;
+  gap: 0.85rem;
 }
 
+.appointment-details .appointment-date {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--indigo);
+  letter-spacing: -0.01em;
+}
+
+.appointment-details .appointment-time {
+  margin: 0;
+  display: inline-block;
+  align-self: start;
+  padding: 0.3rem 0.8rem;
+  border-radius: var(--r-pill);
+  background: var(--info-soft);
+  color: var(--indigo);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.appointment-details .appointment-location {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.98rem;
+}
+
+.appointment-details .appointment-doctor {
+  margin: 0;
+  color: var(--ink);
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+/* Footer row: status chip, nurse credential, call link. */
+.appointment-card-foot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--hairline);
+}
+
+.appointment-call {
+  margin-left: auto;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--indigo);
+  text-decoration: none;
+}
+
+.appointment-call:hover {
+  text-decoration: underline;
+}
+
+/* Empty state. */
+.appointment-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+/* --- AI tips card -------------------------------------------------------- */
 .ai-tips-card .tip-content {
-  flex-grow: 1; /* Makes the content area fill the space */
+  flex-grow: 1;
 }
 
 .ai-tips-card h3 {
-  /* Style for the new tip title */
-  font-size: 1.1rem;
-  color: #333;
-  margin-top: 0;
-}
-
-.ai-tips-card .tip-error {
-  /* Style for showing an error message */
-  color: #d9534f;
-  font-weight: bold;
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ink-strong);
 }
 
 .ai-tips-card .tip-text {
-  font-size: 1.1rem;
-  font-style: italic;
-  color: #333;
-  line-height: 1.6;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.98rem;
+  line-height: 1.7;
 }
 
-.new-tip-btn {
-  background-color: #5cb85c;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-  font-size: 1rem;
-  margin-top: 1rem;
+.ai-tips-card .tip-error {
+  margin: 0;
+  padding: 0.7rem 1rem;
+  border-radius: var(--r-sm);
+  background: var(--danger-soft);
+  color: var(--danger);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.ai-tips-card .new-tip-btn {
   align-self: flex-start;
-  transition: background-color 0.2s;
+  background: var(--gradient-brand);
+  color: #fff;
+  border: none;
+  padding: 0.65rem 1.3rem;
+  border-radius: var(--r-pill);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-brand);
+  transition: transform 0.18s var(--ease), filter 0.18s var(--ease);
 }
 
-.new-tip-btn:hover {
-  background-color: #449d44;
+.ai-tips-card .new-tip-btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
 }
 
-/* --- Quick Actions Card --- */
+.ai-tips-card .new-tip-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* --- Quick actions ------------------------------------------------------- */
 .quick-actions-card .buttons-container {
   display: grid;
-  grid-template-columns: 1fr 1fr; /* 2 columns of buttons */
-  gap: 0.75rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
 }
 
-.action-btn {
-  background-color: #f0f8ff; /* Light blue */
-  color: #0056b3;
+.quick-actions-card .action-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 62px;
+  padding: 0.9rem 1rem;
+  border-radius: var(--r-md);
+  border: 1px solid var(--hairline);
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--ink);
+  font-size: 0.92rem;
+  font-weight: 600;
   text-decoration: none;
-  padding: 1rem;
-  border-radius: 5px;
   text-align: center;
-  font-weight: bold;
-  transition: all 0.2s;
-  border: 1px solid #bde0ff;
+  transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease),
+    border-color 0.18s var(--ease), background-color 0.18s var(--ease);
 }
 
-.action-btn:hover {
-  background-color: #e6f3ff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+.quick-actions-card .action-btn:hover {
+  transform: translateY(-2px);
+  border-color: rgba(99, 102, 241, 0.4);
+  background: #fff;
+  box-shadow: var(--shadow-md);
 }
 
-/* Special button for Mobi */
-.action-btn.chat-btn {
-  background-color: #007bff;
-  color: white;
-  grid-column: 1 / -1; /* Makes this button span both columns */
+.quick-actions-card .action-btn.chat-btn {
+  grid-column: 1 / -1;
+  min-height: 72px;
+  background: var(--gradient-brand);
+  border-color: transparent;
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-brand);
 }
 
-.action-btn.chat-btn:hover {
-  background-color: #0056b3;
+.quick-actions-card .action-btn.chat-btn:hover {
+  filter: brightness(1.06);
+}
+
+/* --- Logout -------------------------------------------------------------- */
+.logout-btn {
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  padding: 0.65rem 1.3rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: linear-gradient(120deg, #fb7185, #e11d48);
+  color: #fff;
+  box-shadow: 0 10px 26px rgba(225, 29, 72, 0.28);
+  transition: transform 0.18s var(--ease), filter 0.18s var(--ease);
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  filter: brightness(1.06);
+}
+
+.logout-btn:focus-visible {
+  outline: 3px solid rgba(225, 29, 72, 0.4);
+  outline-offset: 2px;
+}
+
+/* --- Loading / empty ----------------------------------------------------- */
+.mother-dashboard-container .loading-note {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 0.92rem;
+}
+
+@media (max-width: 860px) {
+  .mother-dashboard-container {
+    padding: 1.5rem 1.1rem 3rem;
+  }
+
+  .mother-hero {
+    padding: 1.4rem;
+  }
+
+  .quick-actions-card .buttons-container {
+    grid-template-columns: 1fr;
+  }
 }

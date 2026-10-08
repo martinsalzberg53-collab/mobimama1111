@@ -1,98 +1,156 @@
 /* --- Main Navbar Container --- */
 .navbar-container {
+  position: sticky;
+  top: 0;
+  z-index: 40;
   display: flex;
-  justify-content: space-between; /* Pushes brand left, links right */
   align-items: center;
-  padding: 1rem 2.5%; /* Matches the padding of your dashboard */
-  background-color: #ffffff;
-  border-bottom: 1px solid #e0e0e0;
-  font-family: Arial, sans-serif;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem 2.5%;
+  background: rgba(255, 255, 255, 0.82);
+  border-bottom: 1px solid rgba(15, 23, 42, 0.07);
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  font-family: var(--font-body, system-ui, sans-serif);
 }
 
 /* --- Brand/Logo --- */
 .navbar-brand a {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #0056b3; /* Main brand color */
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-size: 1.32rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
   text-decoration: none;
+  background: var(--gradient-brand, linear-gradient(120deg, #4f46e5, #7c3aed));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Re-assert on hover: the global `a:hover` in index.css ties on specificity
+   and would flatten the gradient text back to a solid colour. */
+.navbar-brand a:hover {
+  background: var(--gradient-brand, linear-gradient(120deg, #4f46e5, #7c3aed));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  filter: brightness(1.08);
 }
 
 /* --- Links Container --- */
 .navbar-links {
   display: flex;
   align-items: center;
-  gap: 1.5rem; /* This replaces all your inline margin-right styles */
+  gap: 1.35rem;
 }
 
 /* --- Individual NavLinks --- */
 .nav-link {
+  position: relative;
   text-decoration: none;
-  color: #333;
+  color: var(--ink-soft, #475569);
+  font-size: 0.94rem;
   font-weight: 500;
-  padding-bottom: 5px; /* Space for the active border */
-  border-bottom: 2px solid transparent; /* Placeholder for active state */
-  transition: all 0.2s ease;
+  padding-bottom: 4px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-color 0.2s ease;
 }
 
 .nav-link:hover {
-  color: #0056b3;
+  color: var(--indigo, #4f46e5);
+}
+
+.nav-link:focus-visible {
+  outline: 2px solid rgba(79, 70, 229, 0.45);
+  outline-offset: 3px;
+  border-radius: 4px;
 }
 
 /* --- Active Link Style --- */
-/* This style is applied by NavLink automatically */
 .nav-link.active-link {
-  color: #0056b3;
-  border-bottom-color: #0056b3; /* Adds an underline to the active page */
+  color: var(--indigo, #4f46e5);
+  font-weight: 600;
+  border-bottom-color: var(--indigo, #4f46e5);
 }
 
 /* --- User Greeting --- */
 .navbar-greeting {
-  color: #555;
-  font-style: italic;
+  color: var(--ink-faint, #94a3b8);
+  font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 /* --- Buttons --- */
-.logout-button {
-  background-color: #d9534f;
-  color: white;
+.navbar-container .logout-button,
+.navbar-container .cta-button {
   border: none;
-  padding: 8px 14px;
-  border-radius: 5px;
+  border-radius: 999px;
+  padding: 0.5rem 1.1rem;
   cursor: pointer;
-  font-size: 0.95rem;
-  transition: background-color 0.2s;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(120deg, #fb7185, #e11d48);
+  box-shadow: 0 8px 20px rgba(225, 29, 72, 0.26);
+  transition: transform 0.18s ease, filter 0.18s ease;
 }
 
-.logout-button:hover {
-  background-color: #c9302c;
+.navbar-container .logout-button:hover,
+.navbar-container .cta-button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.06);
+  color: #fff;
 }
 
 /* "Call to Action" button for Sign Up */
-.cta-button {
-  background-color: #007bff;
-  color: white;
-  padding: 8px 14px;
-  border-radius: 5px;
+.navbar-container .cta-button {
+  background: var(--gradient-brand, linear-gradient(120deg, #4f46e5, #7c3aed));
+  box-shadow: 0 8px 20px rgba(79, 70, 229, 0.28);
 }
-.cta-button:hover {
-  background-color: #0056b3;
-  color: white;
+
+.navbar-container .cta-button.active-link {
+  border-bottom: none;
 }
-.cta-button.active-link {
-  border-bottom: none; /* No underline for buttons */
+
+.navbar-container .logout-button:focus-visible,
+.navbar-container .cta-button:focus-visible {
+  outline: 2px solid rgba(79, 70, 229, 0.45);
+  outline-offset: 2px;
 }
 
 .language-switcher {
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 5px 8px;
+  border: 1px solid rgba(15, 23, 42, 0.1);
+  border-radius: 999px;
+  padding: 0.42rem 0.7rem;
+  font-family: inherit;
   font-size: 0.82rem;
-  background: #f8fafc;
-  color: #334155;
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--ink-soft, #475569);
   cursor: pointer;
-  margin-left: 8px;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .language-switcher:focus {
-  outline: 2px solid #4f46e5;
+  outline: none;
+  border-color: var(--indigo, #4f46e5);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.14);
+}
+
+/* --- Responsive --- */
+@media (max-width: 720px) {
+  .navbar-container {
+    flex-wrap: wrap;
+    padding: 0.7rem 1.25rem;
+  }
+
+  .navbar-links {
+    gap: 0.9rem;
+    flex-wrap: wrap;
+  }
+
+  .navbar-greeting {
+    display: none;
+  }
 }

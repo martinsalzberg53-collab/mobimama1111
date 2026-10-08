@@ -1,9 +1,14 @@
+@import "./styles/theme.css";
+
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: var(--font-body, system-ui, Avenir, Helvetica, Arial, sans-serif);
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
+  /* Force light form controls. Previously "light dark" meant a visitor with
+     dark OS settings got dark <select>/<input> widgets sitting on our light
+     glass panels. */
+  color-scheme: light;
   color: #213547; /* dark text for white background */
   background-color: #ffffff;
 
@@ -38,40 +43,36 @@ body {
   color: #213547; /* dark text */
 }
 
-/* 3️⃣ Optional: style h1, buttons, etc. */
+/* 3️⃣ Headings use the display face. The old blanket 3.2em rule made every
+   dashboard <h1> enormous regardless of its container, so pages that want a
+   smaller heading now have to opt out. */
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  font-family: var(--font-display, system-ui, sans-serif);
+  font-size: 2rem;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
 }
 
+/* Baseline button reset only. Colour, radius and hover states live in
+   theme.css (.btn) and per-page sheets. The old `button:hover { border-color:
+   #646cff }` was (0,1,1) and beat every .btn-* class, which painted a purple
+   border across the gradient pill buttons on hover. */
 button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
   font-family: inherit;
-  background-color: #f1f1f1; /* lighter button for white bg */
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
 }
 
+button:focus-visible {
+  outline: 3px solid rgba(79, 70, 229, 0.45);
+  outline-offset: 2px;
+}
+
+/* The original block here also set `a:hover` and a flat `button` background,
+   which is Vite starter boilerplate. Both outranked component classes and
+   recoloured the quick-action tiles and gradient buttons, so they are gone. */
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;
     background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
   }
 }

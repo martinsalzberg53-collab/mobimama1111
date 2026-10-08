@@ -25,23 +25,23 @@ const MotherDashboard = () => {
   }
 
   return (
-    // 4. Use the non-conflicting CSS class name
-    <div className="mother-dashboard-container">
-      {/* Header / Greeting */}
-      <header className="dashboard-header">
-        <div className="header-greeting">
-          {/* 5. Use user.first_name, not username */}
-          <h1>Hi, {user?.first_name}!</h1>
-          <p>Welcome to your Mobi Mama dashboard</p>
+    <div className="mother-dashboard-container aurora-bg">
+      <header className="mother-hero">
+        <div className="mother-hero-copy">
+          <span className="eyebrow">Mobi Mama</span>
+          <h1>
+            Hi, <span className="gradient-text">{user.first_name}</span>!
+          </h1>
+          <p>
+            Your pregnancy journey, appointments and health tips in one place.
+          </p>
         </div>
-        {/* 6. Re-add the logout button */}
         <button onClick={handleLogout} className="logout-btn">
           Logout
         </button>
       </header>
 
-      {/* Main Sections - Now a responsive grid */}
-      <main className="dashboard-grid">
+      <main className="mother-dashboard-grid">
         <AppointmentCard />
         <AITipsCard />
         <QuickActionsCard />

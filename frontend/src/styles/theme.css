@@ -1,0 +1,295 @@
+/* ==========================================================================
+   Mobi Mama - shared design tokens
+   Imported once from index.css. Every dashboard pulls its colours, radii and
+   shadows from here so the nurse and mother views stay in sync.
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
+
+:root {
+  /* --- Type ------------------------------------------------------------- */
+  --font-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", "Inter", system-ui, sans-serif;
+
+  /* --- Ink (text on light glass) ---------------------------------------- */
+  --ink-strong: #0b1020;
+  --ink: #1e293b;
+  --ink-soft: #475569;
+  --ink-faint: #94a3b8;
+
+  /* --- Brand ------------------------------------------------------------ */
+  --indigo: #4f46e5;
+  --violet: #7c3aed;
+  --cyan: #06b6d4;
+  --teal: #0ea5a4;
+
+  --gradient-brand: linear-gradient(120deg, #4f46e5 0%, #7c3aed 48%, #06b6d4 100%);
+  --gradient-warm: linear-gradient(120deg, #0ea5a4 0%, #06b6d4 100%);
+
+  /* --- Status ----------------------------------------------------------- */
+  --ok: #059669;
+  --ok-soft: #d1fae5;
+  --warn: #b45309;
+  --warn-soft: #fef3c7;
+  --danger: #e11d48;
+  --danger-soft: #ffe4e6;
+  --info-soft: #e0e7ff;
+
+  /* --- Surfaces --------------------------------------------------------- */
+  --glass: rgba(255, 255, 255, 0.72);
+  --glass-strong: rgba(255, 255, 255, 0.88);
+  --glass-border: rgba(255, 255, 255, 0.75);
+  --hairline: rgba(15, 23, 42, 0.08);
+  --field: rgba(255, 255, 255, 0.9);
+
+  /* --- Shape ------------------------------------------------------------ */
+  --r-sm: 12px;
+  --r-md: 18px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+  --r-pill: 999px;
+
+  /* --- Elevation -------------------------------------------------------- */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06), 0 2px 8px rgba(15, 23, 42, 0.04);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.07), 0 12px 28px rgba(15, 23, 42, 0.06);
+  --shadow-lg: 0 8px 24px rgba(15, 23, 42, 0.09), 0 24px 56px rgba(15, 23, 42, 0.09);
+  --shadow-brand: 0 10px 30px rgba(79, 70, 229, 0.28);
+
+  /* --- Motion ----------------------------------------------------------- */
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ==========================================================================
+   Shared primitives
+   ========================================================================== */
+
+/* Aurora mesh backdrop. Scoped to a container so pages without it (Login,
+   Register, Chat) keep the plain background. */
+.aurora-bg {
+  position: relative;
+  isolation: isolate;
+}
+
+.aurora-bg::before {
+  content: "";
+  position: absolute;
+  inset: -30% -10% auto -10%;
+  height: 70%;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(45% 55% at 12% 18%, rgba(99, 102, 241, 0.28), transparent 70%),
+    radial-gradient(40% 50% at 78% 8%, rgba(6, 182, 212, 0.24), transparent 70%),
+    radial-gradient(50% 60% at 55% 42%, rgba(124, 58, 237, 0.16), transparent 70%);
+  filter: blur(28px);
+  animation: aurora-drift 18s var(--ease) infinite alternate;
+}
+
+@keyframes aurora-drift {
+  from {
+    transform: translate3d(-2%, -1%, 0) scale(1);
+  }
+  to {
+    transform: translate3d(3%, 2%, 0) scale(1.08);
+  }
+}
+
+/* Respect users who ask for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .aurora-bg::before {
+    animation: none;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+.panel {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+}
+
+.gradient-text {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Small uppercase label used above panel titles. */
+.eyebrow {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--r-pill);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.badge.low {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.badge.medium {
+  background: var(--warn-soft);
+  color: var(--warn);
+}
+
+.badge.high {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.badge.pending {
+  background: var(--info-soft);
+  color: var(--indigo);
+}
+
+/* Neutral count chip - avoids implying a status where there isn't one. */
+.badge.neutral {
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--ink-soft);
+}
+
+.badge.approved {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.badge.cancelled,
+.badge.completed {
+  background: #e2e8f0;
+  color: var(--ink-soft);
+}
+
+/* Buttons shared by both dashboards. */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  padding: 0.65rem 1.3rem;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.18s var(--ease), box-shadow 0.18s var(--ease),
+    filter 0.18s var(--ease);
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--gradient-brand);
+  color: #fff;
+  box-shadow: var(--shadow-brand);
+}
+
+.btn-primary:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.btn-ok {
+  background: linear-gradient(120deg, #10b981, #059669);
+  color: #fff;
+  box-shadow: 0 10px 26px rgba(5, 150, 105, 0.3);
+}
+
+.btn-danger {
+  background: linear-gradient(120deg, #fb7185, #e11d48);
+  color: #fff;
+  box-shadow: 0 10px 26px rgba(225, 29, 72, 0.28);
+}
+
+.btn-ghost {
+  background: rgba(255, 255, 255, 0.65);
+  border-color: var(--hairline);
+  color: var(--ink);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  box-shadow: var(--shadow-sm);
+}
+
+.btn:focus-visible {
+  outline: 3px solid rgba(79, 70, 229, 0.45);
+  outline-offset: 2px;
+}
+
+/* Form fields. */
+.field {
+  width: 100%;
+  border: 1px solid var(--hairline);
+  border-radius: var(--r-sm);
+  background: var(--field);
+  padding: 0.7rem 0.9rem;
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--ink);
+  transition: border-color 0.18s var(--ease), box-shadow 0.18s var(--ease);
+}
+
+.field:focus {
+  outline: none;
+  border-color: var(--indigo);
+  box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.14);
+}
+
+/* Inline status messages. */
+.notice {
+  margin: 0;
+  padding: 0.7rem 1rem;
+  border-radius: var(--r-sm);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.notice-success {
+  background: var(--ok-soft);
+  color: var(--ok);
+}
+
+.notice-error {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.notice-empty {
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px dashed var(--hairline);
+  color: var(--ink-soft);
+  font-weight: 500;
+}
