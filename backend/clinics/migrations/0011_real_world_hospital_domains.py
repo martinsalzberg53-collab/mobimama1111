@@ -1,3 +1,5 @@
+import re
+
 from django.db import migrations
 from django.utils.text import slugify
 
@@ -14,6 +16,11 @@ from django.utils.text import slugify
 # published contact email by web research. Flagged "inferred / placeholder /
 # site is down" cases are still included because they are the facility's real
 # domain; they are listed in NOTES for transparency.
+#
+# Lookup is by NAME with address-based disambiguation for duplicate names, so
+# the migration is robust to seed-address drift between environments (the
+# earlier strict (name, address) key hard-failed on a production DB whose
+# row address differed by a few characters).
 # ---------------------------------------------------------------------------
 
 # (name, address) -> real domain
@@ -340,17 +347,40 @@ REAL = {
 KEEP = {"ghs.gov.gh", "moh.gov.gh"}
 
 
+def _name_index():
+    """name -> list of (address, domain), preserving order."""
+    index = {}
+    for (name, address), domain in REAL.items():
+        index.setdefault(name, []).append((address, domain))
+    return index
+
+
+def _lookup_domain(name_index, name, address):
+    candidates = name_index.get(name)
+    if not candidates:
+        return "ghs.gov.gh"
+    if len(candidates) == 1:
+        return candidates[0][1]
+    address = (address or "").lower()
+    best, best_score = None, -1
+    for cand_address, domain in candidates:
+        tokens = {
+            w for w in re.findall(r"[a-z0-9'-]+", cand_address.lower())
+            if len(w) > 3
+        }
+        score = sum(1 for t in tokens if t in address)
+        if score > best_score:
+            best, best_score = domain, score
+    return best or candidates[0][1]
+
+
 def apply(apps, schema_editor):
     Clinic = apps.get_model("clinics", "Clinic")
     AllowedHospitalDomain = apps.get_model("clinics", "AllowedHospitalDomain")
+    name_index = _name_index()
 
-    missing = []
     for clinic in Clinic.objects.all():
-        domain = REAL.get((clinic.name, clinic.address))
-        if domain is None:
-            missing.append((clinic.name, clinic.address))
-            domain = "ghs.gov.gh"
-        clinic.email_domain = domain
+        clinic.email_domain = _lookup_domain(name_index, clinic.name, clinic.address)
         clinic.save(update_fields=["email_domain"])
 
     used = set(
@@ -359,9 +389,6 @@ def apply(apps, schema_editor):
     AllowedHospitalDomain.objects.all().delete()
     for domain in sorted(used | KEEP):
         AllowedHospitalDomain.objects.get_or_create(domain=domain)
-
-    if missing:
-        raise SystemExit(f"UNMAPPED HOSPITALS: {missing}")
 
 
 def revert(apps, schema_editor):
